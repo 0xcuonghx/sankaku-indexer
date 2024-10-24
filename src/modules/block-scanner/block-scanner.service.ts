@@ -47,7 +47,7 @@ export class BlockScannerService {
 
       // Queue any remaining blocks for backfilling
       if (localBlock < fromBlock) {
-        await this.syncService.backfillSync(localBlock, fromBlock - 1);
+        this.syncService.backfillSync(localBlock, fromBlock - 1);
       }
 
       // To avoid missing any events, save the latest synced block with a delay.
