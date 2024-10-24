@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createPublicClient, http, PublicClient } from 'viem';
 import { polygonAmoy } from 'viem/chains';
+import _ from 'lodash';
 
 @Injectable()
 export class BlockchainClientService {
@@ -21,5 +22,11 @@ export class BlockchainClientService {
 
   async getBlockNumber() {
     return this.client.getBlockNumber();
+  }
+
+  async getBlocks(fromBlock: number, toBlock: number) {
+    return _.range(fromBlock, toBlock + 1).map((blockNumber) =>
+      this.client.getBlock({ blockNumber: BigInt(blockNumber) }),
+    );
   }
 }

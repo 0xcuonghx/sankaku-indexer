@@ -1,9 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
 
 const BLOCKS_PER_BATCH = 1000;
 @Injectable()
 export class SyncService {
   private readonly logger = new Logger(SyncService.name);
+  constructor(
+    private readonly blockchainClientService: BlockchainClientService,
+  ) {}
 
   async realtimeSync(fromBlock: number, toBlock: number) {
     this.logger.debug(
@@ -45,5 +49,16 @@ export class SyncService {
     this.logger.debug(
       `Syncing from block ${fromBlock} to block ${toBlock} (backfill: ${backfill})`,
     );
+
+    const blocks = await this.blockchainClientService.getBlocks(
+      fromBlock,
+      toBlock,
+    );
+
+    if (!blocks) {
+      throw new Error(
+        `Blocks ${fromBlock} to ${toBlock} not found with RPC provider`,
+      );
+    }
   }
 }
