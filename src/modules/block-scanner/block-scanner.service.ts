@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
-import { RealtimeSyncService } from '../realtime-sync/realtime-sync.service';
-import { BackfillSyncService } from '../backfill-sync/backfill-sync.service';
+import { SyncService } from '../sync/sync.service';
 
 const BLOCK_SCAN_INTERVAL = 15; // seconds
 
@@ -14,8 +13,7 @@ export class BlockScannerService {
 
   constructor(
     private readonly blockchainClientService: BlockchainClientService,
-    private readonly realtimeSyncService: RealtimeSyncService,
-    private readonly backfillSyncService: BackfillSyncService,
+    private readonly syncService: SyncService,
   ) {}
 
   @Cron(`*/${BLOCK_SCAN_INTERVAL} * * * * *`)
@@ -45,11 +43,11 @@ export class BlockScannerService {
       }
 
       const fromBlock = Math.max(localBlock, headBlock - maxBlocks + 1);
-      await this.realtimeSyncService.sync(fromBlock, headBlock);
+      await this.syncService.realtimeSync(fromBlock, headBlock);
 
       // Queue any remaining blocks for backfilling
       if (localBlock < fromBlock) {
-        await this.backfillSyncService.sync(localBlock, fromBlock - 1);
+        await this.syncService.backfillSync(localBlock, fromBlock - 1);
       }
 
       // To avoid missing any events, save the latest synced block with a delay.
