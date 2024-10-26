@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
+import { getEventInterfaces } from 'src/abis';
+import { delay } from 'lodash';
+import { MAX_ATTEMPTS } from 'src/utils/constants';
 
 const BLOCKS_PER_BATCH = 1000;
 @Injectable()
@@ -37,7 +40,7 @@ export class SyncService {
       }
 
       for (const job of splitJobs) {
-        await this.sync(job.fromBlock, job.toBlock, true);
+        delay(() => this.sync(job.fromBlock, job.toBlock, true), 1000);
       }
       return;
     }
@@ -45,20 +48,50 @@ export class SyncService {
     return this.sync(fromBlock, toBlock, true);
   }
 
-  async sync(fromBlock: number, toBlock: number, backfill: boolean = false) {
-    this.logger.debug(
-      `Syncing from block ${fromBlock} to block ${toBlock} (backfill: ${backfill})`,
-    );
-
-    const blocks = await this.blockchainClientService.getBlocks(
-      fromBlock,
-      toBlock,
-    );
-
-    if (!blocks) {
-      throw new Error(
-        `Blocks ${fromBlock} to ${toBlock} not found with RPC provider`,
+  async sync(
+    fromBlock: number,
+    toBlock: number,
+    backfill: boolean = false,
+    attempts = 1,
+  ) {
+    try {
+      this.logger.debug(
+        `Syncing from block ${fromBlock} to block ${toBlock} (backfill: ${backfill}, attempts: ${attempts})`,
       );
+
+      const blocks = await this.blockchainClientService.getBlocks(
+        fromBlock,
+        toBlock,
+      );
+
+      if (!blocks) {
+        throw new Error(
+          `Blocks ${fromBlock} to ${toBlock} not found with RPC provider`,
+        );
+      }
+
+      const eventAbis = getEventInterfaces().map((iface) => iface.abi);
+      const logs = await this.blockchainClientService.publicClient.getLogs({
+        fromBlock: BigInt(fromBlock),
+        toBlock: BigInt(toBlock),
+        events: eventAbis,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Error syncing from block ${fromBlock} to block ${toBlock} backfill: ${backfill}`,
+      );
+
+      if (attempts > MAX_ATTEMPTS) {
+        this.logger.error(
+          `Max attempts try to sync from block ${fromBlock} to block ${toBlock} backfill: ${backfill}`,
+        );
+        return;
+      }
+
+      this.logger.debug(
+        `Retrying sync from block ${fromBlock} to block ${toBlock} backfill: ${backfill}`,
+      );
+      delay(() => this.sync(fromBlock, toBlock, backfill, attempts + 1), 1000);
     }
   }
 }

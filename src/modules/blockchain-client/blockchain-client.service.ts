@@ -1,23 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createPublicClient, http, PublicClient } from 'viem';
+import {
+  AbiEvent,
+  CreateEventFilterReturnType,
+  createPublicClient,
+  http,
+  PublicClient,
+  Transport,
+} from 'viem';
 import { polygonAmoy } from 'viem/chains';
 import _ from 'lodash';
 
 @Injectable()
 export class BlockchainClientService {
-  private client: PublicClient;
+  private readonly polygonAmoyRpcUrl: string;
+  private client: PublicClient<Transport, typeof polygonAmoy>;
   constructor(private readonly configService: ConfigService) {
-    const polygonAmoyRpcUrl = this.configService.get<string>(
+    this.polygonAmoyRpcUrl = this.configService.get<string>(
       'POLYGON_AMOY_RPC_URL',
     );
 
     const client = createPublicClient({
       chain: polygonAmoy,
-      transport: http(polygonAmoyRpcUrl),
-    });
+      transport: http(this.polygonAmoyRpcUrl),
+    }) as any;
 
-    this.client = client as any;
+    this.client = client;
   }
 
   async getBlockNumber() {
@@ -28,5 +36,9 @@ export class BlockchainClientService {
     return _.range(fromBlock, toBlock + 1).map((blockNumber) =>
       this.client.getBlock({ blockNumber: BigInt(blockNumber) }),
     );
+  }
+
+  get publicClient(): PublicClient<Transport, typeof polygonAmoy> {
+    return this.client;
   }
 }
