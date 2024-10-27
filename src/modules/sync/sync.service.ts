@@ -5,8 +5,8 @@ import { MAX_ATTEMPTS } from 'src/utils/constants';
 import { EnhancedEvent, EnhancedEventsByKind } from 'src/types/event.type';
 import { EventHandlerService } from '../event-handler/event-handler.service';
 import { delay } from 'src/utils/helpers';
+import { getNetworkSettings } from 'src/utils/settings';
 
-const BLOCKS_PER_BATCH = 1000;
 @Injectable()
 export class SyncService {
   private readonly logger = new Logger(SyncService.name);
@@ -31,7 +31,7 @@ export class SyncService {
     // if the syncDetails are null, split the job into smaller jobs of 1 block
     // otherwise, split the job into smaller jobs of 1 blocks
     const diff = toBlock - fromBlock;
-    const splitSize = BLOCKS_PER_BATCH;
+    const splitSize = getNetworkSettings().blocksPerBatch;
 
     if (diff > splitSize) {
       const splitJobs = [];
