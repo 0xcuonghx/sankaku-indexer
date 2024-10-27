@@ -8,7 +8,7 @@ const BLOCK_SCAN_INTERVAL = 15; // seconds
 @Injectable()
 export class BlockScannerService {
   private readonly logger = new Logger(BlockScannerService.name);
-  private lastSyncedBlock = 13561366;
+  private lastSyncedBlock = 13669287;
   private lock = false;
 
   constructor(
