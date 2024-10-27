@@ -20,3 +20,7 @@ export interface EnhancedEvent<
 export interface EnhancedEventsByKind {
   [kind: string]: EnhancedEvent[];
 }
+
+export interface EnhancedEventsBySubKind {
+  [kind: string]: EnhancedEvent[];
+}
