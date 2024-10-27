@@ -3,7 +3,7 @@ import { AbiEvent, Log, ParseAbiItem } from 'viem';
 export interface EventInterface {
   kind: string;
   subKind: string;
-  addresses: Record<string, boolean>;
+  addresses?: Record<string, boolean>;
   topic: string;
   numberOfTopics: number;
   abi: ParseAbiItem<string>;

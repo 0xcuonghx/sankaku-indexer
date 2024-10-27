@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
 import { getEventInterfaces } from 'src/abis';
-import { delay } from 'lodash';
 import { MAX_ATTEMPTS } from 'src/utils/constants';
 import { EnhancedEvent, EnhancedEventsByKind } from 'src/types/event.type';
 import { EventHandlerService } from '../event-handler/event-handler.service';
+import { delay } from 'src/utils/helpers';
 
 const BLOCKS_PER_BATCH = 1000;
 @Injectable()
@@ -43,8 +43,10 @@ export class SyncService {
       }
 
       for (const job of splitJobs) {
-        delay(() => this.sync(job.fromBlock, job.toBlock, true), 1000);
+        await delay(60000);
+        this.sync(job.fromBlock, job.toBlock, true);
       }
+
       return;
     }
 
@@ -107,8 +109,12 @@ export class SyncService {
       await this.eventHandlerService.handleEvents(eventsByKind, backfill);
     } catch (error) {
       this.logger.error(
-        `Error syncing from block ${fromBlock} to block ${toBlock} backfill: ${backfill}`,
+        `Error syncing from block ${fromBlock} to block ${toBlock} backfill: ${backfill}, error: ${error}`,
       );
+
+      if (error?.status === 429) {
+        this.logger.debug('Rate limited');
+      }
 
       if (attempts > MAX_ATTEMPTS) {
         this.logger.error(
@@ -120,7 +126,8 @@ export class SyncService {
       this.logger.debug(
         `Retrying sync from block ${fromBlock} to block ${toBlock} backfill: ${backfill}`,
       );
-      delay(() => this.sync(fromBlock, toBlock, backfill, attempts + 1), 1000);
+      await delay(10000);
+      this.sync(fromBlock, toBlock, backfill, attempts + 1);
     }
   }
 
