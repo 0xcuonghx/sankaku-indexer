@@ -43,7 +43,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
 
   async handleExecute(events: EnhancedEvent[], backfill = false) {
     this.logger.debug(
-      `Found ${events.length} uninstall events (backfill: ${backfill})`,
+      `Found ${events.length} execute events (backfill: ${backfill})`,
     );
   }
 }
