@@ -2,8 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
 import { SyncService } from '../sync/sync.service';
-
-const BLOCK_SCAN_INTERVAL = 15; // seconds
+import { getNetworkSettings } from 'src/utils/settings';
 
 @Injectable()
 export class BlockScannerService {
@@ -16,20 +15,22 @@ export class BlockScannerService {
     private readonly syncService: SyncService,
   ) {}
 
-  @Cron(`*/${BLOCK_SCAN_INTERVAL} * * * * *`)
+  @Cron(`*/${getNetworkSettings().blockScanInterval} * * * * *`)
   async scanBlocks() {
     try {
       if (this.lock) {
         return;
       }
       this.lock = true;
-      this.logger.debug(`Scanning blocks every ${BLOCK_SCAN_INTERVAL} seconds`);
+      this.logger.debug(
+        `Scanning blocks every ${getNetworkSettings().blockScanInterval} seconds`,
+      );
 
       // We allow syncing of up to `maxBlocks` blocks behind the
       // head of the blockchain. If the indexer lagged behind more
       // than that, then all blocks before that will be sent to the
       // backfill queue.
-      const maxBlocks = 256;
+      const maxBlocks = getNetworkSettings().blocksPerBatch;
 
       const headBlock = Number(
         await this.blockchainClientService.getBlockNumber(),

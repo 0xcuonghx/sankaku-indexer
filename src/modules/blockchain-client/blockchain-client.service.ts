@@ -33,8 +33,10 @@ export class BlockchainClientService {
   }
 
   async getBlocks(fromBlock: number, toBlock: number) {
-    return _.range(fromBlock, toBlock + 1).map((blockNumber) =>
-      this.client.getBlock({ blockNumber: BigInt(blockNumber) }),
+    return Promise.all(
+      _.range(fromBlock, toBlock + 1).map((blockNumber) =>
+        this.client.getBlock({ blockNumber: BigInt(blockNumber) }),
+      ),
     );
   }
 
