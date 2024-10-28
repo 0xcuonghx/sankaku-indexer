@@ -48,7 +48,7 @@ export class SyncService {
       }
 
       for (const job of splitJobs) {
-        await delay(60000);
+        await delay(getNetworkSettings().backfillDelayTime);
         this.sync(job.fromBlock, job.toBlock, true);
       }
 
@@ -144,7 +144,7 @@ export class SyncService {
       this.logger.debug(
         `Retrying sync from block ${fromBlock} to block ${toBlock} backfill: ${backfill}`,
       );
-      await delay(10000);
+      await delay(getNetworkSettings().retryDelayTime);
       this.sync(fromBlock, toBlock, backfill, attempts + 1);
     }
   }

@@ -5,5 +5,7 @@ export const getNetworkSettings = () => {
     },
     blocksPerBatch: 100,
     blockScanInterval: 15, // seconds
+    backfillDelayTime: 60000, // milliseconds
+    retryDelayTime: 10000, // milliseconds
   };
 };
