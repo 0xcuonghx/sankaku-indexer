@@ -10,11 +10,11 @@ export interface EventInterface {
 }
 
 export interface EnhancedEvent<
-  T = Log<bigint, number, false, undefined, undefined, ParseAbiItem<string>[]>,
+  T extends string | readonly string[] | readonly unknown[] = any,
 > {
   kind: string;
   subKind: string;
-  log: T;
+  log: Log<bigint, number, false, undefined, undefined, ParseAbiItem<T>[]>;
 }
 
 export interface EnhancedEventsByKind {

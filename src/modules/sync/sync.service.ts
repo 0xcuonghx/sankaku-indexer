@@ -85,6 +85,7 @@ export class SyncService {
         .insert()
         .values(
           blocks.map((block) => ({
+            hash: block.hash,
             block: Number(block.number),
             timestamp: Number(block.timestamp),
           })),
