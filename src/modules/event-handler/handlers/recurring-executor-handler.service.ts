@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { RecurringExecutorExecuteEventsEntity } from '../entities/recurring-executor-execute.entity';
 import { RecurringExecutorInstallEventsEntity } from '../entities/recurring-executor-install.entity';
 import { RecurringExecutorUninstallEventsEntity } from '../entities/recurring-executor-uninstall.entity';
+import { SubscriptionsService } from 'src/modules/subscriptions/subscriptions.service';
 
 @Injectable()
 export class RecurringExecutorHandlerService extends BaseHandlerService {
@@ -18,11 +19,19 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     private recurringExecutorInstallEventsRepository: Repository<RecurringExecutorInstallEventsEntity>,
     @InjectRepository(RecurringExecutorUninstallEventsEntity)
     private recurringExecutorUninstallEventsRepository: Repository<RecurringExecutorUninstallEventsEntity>,
+    private readonly subscriptionsService: SubscriptionsService,
   ) {
     super();
   }
 
-  async handle(events: EnhancedEvent[], backfill = false) {
+  async handle(
+    events: EnhancedEvent<
+      | 'event RecurringExecutionAdded(address indexed smartAccount,uint256 planId, uint8 basis,address receiver,address token,uint256 amount)'
+      | 'event RecurringExecutionRemoved(address indexed smartAccount)'
+      | 'event RecurringExecutionRemoved(address indexed smartAccount)'
+    >[],
+    backfill = false,
+  ) {
     this.logger.debug(`Found ${events.length} events (backfill: ${backfill})`);
 
     const eventsPerSubKind = this.batchEventsBySubKind(events);
@@ -43,6 +52,11 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
           throw new Error(`Unknown event sub-kind: ${subKind}`);
       }
     }
+
+    const accounts = Array.from(
+      new Set(events.map((event) => event.log.args.smartAccount)),
+    );
+    this.subscriptionsService.refetch(accounts);
   }
 
   async handleInstall(

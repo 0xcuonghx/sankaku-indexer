@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
 import { getEventInterfaces } from 'src/abis';
-import { MAX_ATTEMPTS } from 'src/utils/constants';
 import { EnhancedEvent, EnhancedEventsByKind } from 'src/types/event.type';
 import { EventHandlerService } from '../event-handler/event-handler.service';
 import { delay } from 'src/utils/helpers';
@@ -134,7 +133,7 @@ export class SyncService {
         this.logger.debug('Rate limited');
       }
 
-      if (attempts > MAX_ATTEMPTS) {
+      if (attempts > getNetworkSettings().maxAttempts) {
         this.logger.error(
           `Max attempts try to sync from block ${fromBlock} to block ${toBlock} backfill: ${backfill}`,
         );

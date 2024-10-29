@@ -7,7 +7,7 @@ import { getNetworkSettings } from 'src/utils/settings';
 @Injectable()
 export class BlockScannerService {
   private readonly logger = new Logger(BlockScannerService.name);
-  private lastSyncedBlock = 13688513;
+  private lastSyncedBlock = 13446943;
   private lock = false;
 
   constructor(

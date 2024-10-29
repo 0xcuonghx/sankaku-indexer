@@ -20,6 +20,9 @@ export class BlockchainClientService {
       'POLYGON_AMOY_RPC_URL',
     );
 
+    // Using any because of the following error:
+    // Type instantiation is excessively deep and possibly infinite.
+    // https://github.com/wevm/viem/discussions/1301
     const client = createPublicClient({
       chain: polygonAmoy,
       transport: http(this.polygonAmoyRpcUrl),

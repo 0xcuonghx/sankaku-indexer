@@ -9,6 +9,7 @@ import { RecurringExecutorInstallEventsEntity } from './entities/recurring-execu
 import { RecurringExecutorUninstallEventsEntity } from './entities/recurring-executor-uninstall.entity';
 import { RecurringExecutorExecuteEventsEntity } from './entities/recurring-executor-execute.entity';
 import { SmartWalletCreateEventsEntity } from './entities/smart-wallet-create-events.entity';
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SmartWalletCreateEventsEntity } from './entities/smart-wallet-create-ev
       RecurringExecutorExecuteEventsEntity,
       SmartWalletCreateEventsEntity,
     ]),
+    SubscriptionsModule,
   ],
   providers: [
     EventHandlerService,
