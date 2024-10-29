@@ -4,6 +4,7 @@ import { EnhancedEvent } from 'src/types/event.type';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SmartWalletCreateEventsEntity } from '../entities/smart-wallet-create-events.entity';
+import { SmartAccountsService } from 'src/modules/smart-accounts/smart-accounts.service';
 
 @Injectable()
 export class FactoryHandlerService extends BaseHandlerService {
@@ -12,6 +13,7 @@ export class FactoryHandlerService extends BaseHandlerService {
   constructor(
     @InjectRepository(SmartWalletCreateEventsEntity)
     private smartWalletCreateEventsRepository: Repository<SmartWalletCreateEventsEntity>,
+    private readonly smartAccountsService: SmartAccountsService,
   ) {
     super();
   }
@@ -41,23 +43,36 @@ export class FactoryHandlerService extends BaseHandlerService {
       `Found ${events.length} create events (backfill: ${backfill})`,
     );
 
-    await this.smartWalletCreateEventsRepository
-      .createQueryBuilder()
-      .insert()
-      .values(
-        events.map((event) => ({
-          log_index: event.log.logIndex,
-          tx_hash: event.log.transactionHash,
-          block_hash: event.log.blockHash,
-          tx_index: event.log.transactionIndex,
-          block: Number(event.log.blockNumber),
-          address: event.log.address,
-          account: event.log.args.account,
-          owner: event.log.args.owner,
-          salt: event.log.args.salt,
-        })),
-      )
-      .orIgnore()
-      .execute();
+    try {
+      await this.smartWalletCreateEventsRepository
+        .createQueryBuilder()
+        .insert()
+        .values(
+          events.map((event) => ({
+            log_index: event.log.logIndex,
+            tx_hash: event.log.transactionHash,
+            block_hash: event.log.blockHash,
+            tx_index: event.log.transactionIndex,
+            block: Number(event.log.blockNumber),
+            address: event.log.address,
+            account: event.log.args.account,
+            owner: event.log.args.owner,
+            salt: event.log.args.salt,
+          })),
+        )
+        .orIgnore()
+        .execute();
+
+      const accounts = events.map((event) => ({
+        account: event.log.args.account,
+        owner: event.log.args.owner,
+        salt: event.log.args.salt,
+      }));
+
+      await this.smartAccountsService.insert(accounts);
+    } catch (error) {
+      this.logger.debug(error);
+      this.logger.error(`Error handling create events: ${error.message}`);
+    }
   }
 }

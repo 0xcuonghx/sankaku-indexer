@@ -11,6 +11,7 @@ import { RecurringExecutorExecuteEventsEntity } from './entities/recurring-execu
 import { SmartWalletCreateEventsEntity } from './entities/smart-wallet-create-events.entity';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { TokenBalancesModule } from '../token-balances/token-balances.module';
+import { SmartAccountsModule } from '../smart-accounts/smart-accounts.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { TokenBalancesModule } from '../token-balances/token-balances.module';
     ]),
     SubscriptionsModule,
     TokenBalancesModule,
+    SmartAccountsModule,
   ],
   providers: [
     EventHandlerService,
