@@ -4,6 +4,7 @@ import { BaseHandlerService } from './base-handler.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ERC20TransferEventsEntity } from '../entities/erc20-transfer-events.entity';
 import { Repository } from 'typeorm';
+import { TokenBalancesService } from 'src/modules/token-balances/token-balances.service';
 
 @Injectable()
 export class ERC20HandlerService extends BaseHandlerService {
@@ -12,11 +13,15 @@ export class ERC20HandlerService extends BaseHandlerService {
   constructor(
     @InjectRepository(ERC20TransferEventsEntity)
     private erc20TransferEventsRepository: Repository<ERC20TransferEventsEntity>,
+    private readonly tokenBalancesService: TokenBalancesService,
   ) {
     super();
   }
 
-  async handle(events: EnhancedEvent[], backfill = false) {
+  async handle(
+    events: EnhancedEvent<'event Transfer(address indexed from, address indexed to, uint256 value)'>[],
+    backfill = false,
+  ) {
     this.logger.debug(`Found ${events.length} events (backfill: ${backfill})`);
 
     const eventsPerSubKind = this.batchEventsBySubKind(events);
@@ -31,6 +36,18 @@ export class ERC20HandlerService extends BaseHandlerService {
           throw new Error(`Unknown event sub-kind: ${subKind}`);
       }
     }
+
+    const fetchBalanceArgs = Array.from(
+      new Set(
+        events
+          .map((event) => [
+            { account: event.log.args.from, token: event.log.address },
+            { account: event.log.args.to, token: event.log.address },
+          ])
+          .flat(),
+      ),
+    );
+    this.tokenBalancesService.refetch(fetchBalanceArgs);
   }
 
   async handleTransfer(
