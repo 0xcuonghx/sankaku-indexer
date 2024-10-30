@@ -31,6 +31,9 @@ export class SubscriptionsService {
 
   async refetchByAccount(account: `0x${string}`, attempts = 1) {
     try {
+      this.logger.debug(
+        `attempts#${attempts}: Refetching subscription for ${account}`,
+      );
       const [planId, lastExecutionTimestamp] =
         await this.blockchainClientService.publicClient.readContract({
           address: getNetworkSettings()
@@ -109,7 +112,7 @@ export class SubscriptionsService {
         .execute();
     } catch (error) {
       this.logger.debug(error);
-      this.logger.error(`Error refetching subscription for ${account}`, error);
+      this.logger.error(`Error refetching subscription for ${account}`);
 
       if (attempts > getNetworkSettings().maxAttempts) {
         this.logger.error(
@@ -118,9 +121,12 @@ export class SubscriptionsService {
         return;
       }
 
-      this.logger.debug(`Retrying to refetch subscription for ${account}`);
       await delay(getNetworkSettings().retryDelayTime);
       this.refetchByAccount(account, attempts + 1);
     }
+  }
+
+  async getSubscription(account: `0x${string}`) {
+    return this.subscriptionsRepository.findOne({ where: { account } });
   }
 }

@@ -4,31 +4,47 @@ import {
   AbiEvent,
   CreateEventFilterReturnType,
   createPublicClient,
+  createWalletClient,
   http,
+  PrivateKeyAccount,
   PublicClient,
   Transport,
+  WalletClient,
 } from 'viem';
 import { polygonAmoy } from 'viem/chains';
 import _ from 'lodash';
+import { privateKeyToAccount } from 'viem/accounts';
 
 @Injectable()
 export class BlockchainClientService {
-  private readonly polygonAmoyRpcUrl: string;
   private client: PublicClient<Transport, typeof polygonAmoy>;
+  private wallet: WalletClient<
+    Transport,
+    typeof polygonAmoy,
+    PrivateKeyAccount
+  >;
+
   constructor(private readonly configService: ConfigService) {
-    this.polygonAmoyRpcUrl = this.configService.get<string>(
+    const polygonAmoyRpcUrl = this.configService.get<string>(
       'POLYGON_AMOY_RPC_URL',
     );
+    const privateKey = this.configService.get<string>(
+      'EXECUTOR_PRIVATE_KEY',
+    ) as `0x${string}`;
 
     // Using any because of the following error:
     // Type instantiation is excessively deep and possibly infinite.
     // https://github.com/wevm/viem/discussions/1301
-    const client = createPublicClient({
+    this.client = createPublicClient({
       chain: polygonAmoy,
-      transport: http(this.polygonAmoyRpcUrl),
+      transport: http(polygonAmoyRpcUrl),
     }) as any;
 
-    this.client = client;
+    this.wallet = createWalletClient({
+      account: privateKeyToAccount(privateKey),
+      chain: polygonAmoy,
+      transport: http(polygonAmoyRpcUrl),
+    });
   }
 
   async getBlockNumber() {
@@ -45,5 +61,13 @@ export class BlockchainClientService {
 
   get publicClient(): PublicClient<Transport, typeof polygonAmoy> {
     return this.client;
+  }
+
+  get walletClient(): WalletClient<
+    Transport,
+    typeof polygonAmoy,
+    PrivateKeyAccount
+  > {
+    return this.wallet;
   }
 }

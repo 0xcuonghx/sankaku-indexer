@@ -1,4 +1,4 @@
-import { AbiEvent, Log, ParseAbiItem } from 'viem';
+import { Log, ParseAbiItem } from 'viem';
 
 export interface EventInterface {
   kind: string;

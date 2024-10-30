@@ -7,6 +7,8 @@ import { RecurringExecutorExecuteEventsEntity } from '../entities/recurring-exec
 import { RecurringExecutorInstallEventsEntity } from '../entities/recurring-executor-install.entity';
 import { RecurringExecutorUninstallEventsEntity } from '../entities/recurring-executor-uninstall.entity';
 import { SubscriptionsService } from 'src/modules/subscriptions/subscriptions.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventChannel } from 'src/types/internal-event.type';
 
 @Injectable()
 export class RecurringExecutorHandlerService extends BaseHandlerService {
@@ -20,6 +22,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     @InjectRepository(RecurringExecutorUninstallEventsEntity)
     private recurringExecutorUninstallEventsRepository: Repository<RecurringExecutorUninstallEventsEntity>,
     private readonly subscriptionsService: SubscriptionsService,
+    private eventEmitter: EventEmitter2,
   ) {
     super();
   }
@@ -87,6 +90,14 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
       )
       .orIgnore()
       .execute();
+
+    if (!backfill) {
+      events.forEach((event) => {
+        this.eventEmitter.emit(EventChannel.RecurringExecutorInstalled, {
+          account: event.log.args.smartAccount,
+        });
+      });
+    }
   }
 
   async handleUninstall(

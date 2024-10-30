@@ -34,6 +34,9 @@ export class TokenBalancesService {
     attempts = 1,
   ) {
     try {
+      this.logger.debug(
+        `attempts#${attempts}: Refetching token balances for ${account}`,
+      );
       const balance =
         await this.blockchainClientService.publicClient.readContract({
           address: token,
@@ -56,7 +59,7 @@ export class TokenBalancesService {
         .execute();
     } catch (error) {
       this.logger.debug(error);
-      this.logger.error(`Error refetching subscription for ${account}`, error);
+      this.logger.error(`Error token balances for ${account}`);
 
       if (attempts > getNetworkSettings().maxAttempts) {
         this.logger.error(
@@ -65,7 +68,6 @@ export class TokenBalancesService {
         return;
       }
 
-      this.logger.debug(`Retrying to refetch subscription for ${account}`);
       await delay(getNetworkSettings().retryDelayTime);
       this.refetchByAccount(account, token, attempts + 1);
     }

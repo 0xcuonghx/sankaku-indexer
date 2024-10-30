@@ -65,7 +65,7 @@ export class SyncService {
   ) {
     try {
       this.logger.debug(
-        `Syncing from block ${fromBlock} to block ${toBlock} (backfill: ${backfill}, attempts: ${attempts})`,
+        `attempts#${attempts}: Syncing from block ${fromBlock} to block ${toBlock} (backfill: ${backfill}`,
       );
 
       const blocks = await this.blockchainClientService.getBlocks(
