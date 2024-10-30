@@ -45,12 +45,11 @@ export class SubscriptionsService {
       if (planId === 0n) {
         this.subscriptionsRepository
           .createQueryBuilder()
-          .insert()
-          .values({
-            account,
+          .update()
+          .set({
             status: SubscriptionStatus.Inactive,
           })
-          .orUpdate(['status'], ['account'])
+          .where('account = :account', { account })
           .execute();
         return;
       }
@@ -103,6 +102,7 @@ export class SubscriptionsService {
             'receiver',
             'token',
             'amount',
+            'status',
           ],
           ['account'],
         )

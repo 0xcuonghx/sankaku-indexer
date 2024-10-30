@@ -43,7 +43,7 @@ export class BlockScannerService {
       // Fetch the last synced blocked for the current contract type (if it exists)
       let localBlock =
         (await this.lastSyncBlockRepository.findOne({ where: { id: 1 } }))
-          .last_synced_block || getNetworkSettings().startBlock + 1;
+          ?.last_synced_block || getNetworkSettings().startBlock + 1;
 
       if (localBlock >= headBlock) {
         // Nothing to sync
