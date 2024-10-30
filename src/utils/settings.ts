@@ -10,5 +10,6 @@ export const getNetworkSettings = () => {
     backfillDelayTime: 60000, // milliseconds
     retryDelayTime: 10000, // milliseconds
     maxAttempts: 5,
+    startBlock: 0,
   };
 };
