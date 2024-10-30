@@ -73,7 +73,8 @@ export class BlockScannerService {
       this.lock = false;
     } catch (error) {
       this.lock = false;
-      this.logger.error('Error scanning blocks', error);
+      this.logger.error('Error scanning blocks');
+      this.logger.debug(error);
     }
   }
 }

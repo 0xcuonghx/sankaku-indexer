@@ -126,8 +126,9 @@ export class SyncService {
       await this.eventHandlerService.handleEvents(eventsByKind, backfill);
     } catch (error) {
       this.logger.error(
-        `Error syncing from block ${fromBlock} to block ${toBlock} backfill: ${backfill}, error: ${error}`,
+        `Error syncing from block ${fromBlock} to block ${toBlock} backfill: ${backfill}`,
       );
+      this.logger.debug(error);
 
       if (error?.status === 429) {
         this.logger.debug('Rate limited');
