@@ -8,6 +8,7 @@ import {
   SubscriptionReason,
   SubscriptionsEntity,
   SubscriptionStatus,
+  SubscriptionType,
 } from './entities/subscriptions.entity';
 import { Repository, MoreThanOrEqual, LessThan } from 'typeorm';
 import { delay } from 'src/utils/helpers';
@@ -109,6 +110,9 @@ export class SubscriptionsService {
           status: moment(nextExecuteTimestamp).isAfter(moment())
             ? SubscriptionStatus.Active
             : SubscriptionStatus.Inactive,
+          type: [1, 2, 3].includes(basis)
+            ? SubscriptionType.Plus
+            : SubscriptionType.Infinite,
         })
         .orUpdate(
           [
@@ -120,6 +124,7 @@ export class SubscriptionsService {
             'token',
             'amount',
             'status',
+            'type',
           ],
           ['account'],
         )

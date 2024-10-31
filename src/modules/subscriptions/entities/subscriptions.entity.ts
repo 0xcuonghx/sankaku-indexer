@@ -17,6 +17,11 @@ export enum SubscriptionReason {
   Unsubscribed = 'unsubscribed',
 }
 
+export enum SubscriptionType {
+  Plus = 'plus',
+  Infinite = 'infinite',
+}
+
 @Entity({ name: 'subscriptions' })
 export class SubscriptionsEntity {
   @PrimaryColumn()
@@ -56,4 +61,7 @@ export class SubscriptionsEntity {
 
   @Column({ type: 'enum', enum: SubscriptionReason, nullable: true })
   reason: SubscriptionReason;
+
+  @Column({ type: 'enum', enum: SubscriptionType })
+  type: SubscriptionType;
 }
