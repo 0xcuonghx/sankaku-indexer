@@ -23,6 +23,9 @@ export class SubscriptionsEntity {
   @Column()
   last_execution_timestamp: number;
 
+  @Column()
+  next_execution_timestamp: number;
+
   @Column({
     type: 'enum',
     enum: SubscriptionBasis,

@@ -68,13 +68,24 @@ export class SubscriptionsService {
           args: [planId],
         });
 
-      const nextExecuteTimestamp = moment.unix(lastExecutionTimestamp);
-      if (basis === 0) {
-        nextExecuteTimestamp.add(1, 'week');
-      } else if (basis === 1) {
-        nextExecuteTimestamp.add(1, 'month');
-      } else if (basis === 2) {
-        nextExecuteTimestamp.add(6, 'month');
+      let nextExecuteTimestamp = 0;
+      if (lastExecutionTimestamp != 0) {
+        if (basis === 0) {
+          nextExecuteTimestamp = moment
+            .unix(lastExecutionTimestamp)
+            .add(1, 'week')
+            .unix();
+        } else if (basis === 1) {
+          nextExecuteTimestamp = moment
+            .unix(lastExecutionTimestamp)
+            .add(1, 'month')
+            .unix();
+        } else if (basis === 2) {
+          nextExecuteTimestamp = moment
+            .unix(lastExecutionTimestamp)
+            .add(6, 'month')
+            .unix();
+        }
       }
 
       await this.subscriptionsRepository
@@ -83,7 +94,8 @@ export class SubscriptionsService {
         .values({
           account,
           planId: Number(planId),
-          last_execution_timestamp: Number(lastExecutionTimestamp),
+          last_execution_timestamp: lastExecutionTimestamp,
+          next_execution_timestamp: nextExecuteTimestamp,
           basis:
             basis === 0
               ? SubscriptionBasis.Weekly
@@ -93,7 +105,7 @@ export class SubscriptionsService {
           receiver,
           token,
           amount: amount.toString(),
-          status: nextExecuteTimestamp.isAfter(moment())
+          status: moment(nextExecuteTimestamp).isAfter(moment())
             ? SubscriptionStatus.Active
             : SubscriptionStatus.Expired,
         })
@@ -101,6 +113,7 @@ export class SubscriptionsService {
           [
             'planId',
             'last_execution_timestamp',
+            'next_execution_timestamp',
             'basis',
             'receiver',
             'token',

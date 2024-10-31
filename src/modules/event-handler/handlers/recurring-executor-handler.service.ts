@@ -69,7 +69,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     this.logger.debug(
       `Found ${events.length} install events (backfill: ${backfill})`,
     );
-    await this.recurringExecutorInstallEventsRepository
+    const insertedEvents = await this.recurringExecutorInstallEventsRepository
       .createQueryBuilder()
       .insert()
       .values(
@@ -89,12 +89,13 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
         })),
       )
       .orIgnore()
+      .returning('*')
       .execute();
 
     if (!backfill) {
-      events.forEach((event) => {
+      insertedEvents.raw.forEach((event) => {
         this.eventEmitter.emit(EventChannel.RecurringExecutorInstalled, {
-          account: event.log.args.smartAccount,
+          account: event.account,
         });
       });
     }
