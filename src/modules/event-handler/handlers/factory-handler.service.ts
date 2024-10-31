@@ -44,7 +44,7 @@ export class FactoryHandlerService extends BaseHandlerService {
     );
 
     try {
-      await this.smartWalletCreateEventsRepository
+      const insertedEvents = await this.smartWalletCreateEventsRepository
         .createQueryBuilder()
         .insert()
         .values(
@@ -61,12 +61,13 @@ export class FactoryHandlerService extends BaseHandlerService {
           })),
         )
         .orIgnore()
+        .returning('*')
         .execute();
 
-      const accounts = events.map((event) => ({
-        account: event.log.args.account,
-        owner: event.log.args.owner,
-        salt: event.log.args.salt,
+      const accounts = insertedEvents.raw.map((event) => ({
+        account: event.account,
+        owner: event.owner,
+        salt: event.salt,
       }));
 
       await this.smartAccountsService.insert(accounts);

@@ -26,11 +26,17 @@ export class ERC20HandlerService extends BaseHandlerService {
 
     const eventsPerSubKind = this.batchEventsBySubKind(events);
 
+    let eventInsertedRaw: any[] = [];
+
     for (const subKind in eventsPerSubKind) {
       const subKindEvents = eventsPerSubKind[subKind];
       switch (subKind) {
         case 'erc20-transfer':
-          await this.handleTransfer(subKindEvents, backfill);
+          const transferInserted = await this.handleTransfer(
+            subKindEvents,
+            backfill,
+          );
+          eventInsertedRaw = eventInsertedRaw.concat(transferInserted.raw);
           break;
         default:
           throw new Error(`Unknown event sub-kind: ${subKind}`);
@@ -39,10 +45,10 @@ export class ERC20HandlerService extends BaseHandlerService {
 
     const fetchBalanceArgs = Array.from(
       new Set(
-        events
+        eventInsertedRaw
           .map((event) => [
-            { account: event.log.args.from, token: event.log.address },
-            { account: event.log.args.to, token: event.log.address },
+            { account: event.from, token: event.address },
+            { account: event.to, token: event.address },
           ])
           .flat(),
       ),
@@ -58,7 +64,7 @@ export class ERC20HandlerService extends BaseHandlerService {
       `Found ${events.length} transfer events (backfill: ${backfill})`,
     );
 
-    await this.erc20TransferEventsRepository
+    return this.erc20TransferEventsRepository
       .createQueryBuilder()
       .insert()
       .values(
@@ -75,6 +81,7 @@ export class ERC20HandlerService extends BaseHandlerService {
         })),
       )
       .orIgnore()
+      .returning('*')
       .execute();
   }
 }

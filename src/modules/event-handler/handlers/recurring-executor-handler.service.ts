@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { BaseHandlerService } from './base-handler.service';
 import { EnhancedEvent } from 'src/types/event.type';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InsertResult, Repository } from 'typeorm';
 import { RecurringExecutorExecuteEventsEntity } from '../entities/recurring-executor-execute.entity';
 import { RecurringExecutorInstallEventsEntity } from '../entities/recurring-executor-install.entity';
 import { RecurringExecutorUninstallEventsEntity } from '../entities/recurring-executor-uninstall.entity';
@@ -39,25 +39,30 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
 
     const eventsPerSubKind = this.batchEventsBySubKind(events);
 
+    let eventInsertedRaws: any[] = [];
     for (const subKind in eventsPerSubKind) {
       const subKindEvents = eventsPerSubKind[subKind];
+      let eventInserted: InsertResult;
+
       switch (subKind) {
         case 'install':
-          await this.handleInstall(subKindEvents, backfill);
+          eventInserted = await this.handleInstall(subKindEvents, backfill);
           break;
         case 'uninstall':
-          await this.handleUninstall(subKindEvents, backfill);
+          eventInserted = await this.handleUninstall(subKindEvents, backfill);
           break;
         case 'execute':
-          await this.handleExecute(subKindEvents, backfill);
+          eventInserted = await this.handleExecute(subKindEvents, backfill);
           break;
         default:
           throw new Error(`Unknown event sub-kind: ${subKind}`);
       }
+
+      eventInsertedRaws = eventInsertedRaws.concat(eventInserted.raw);
     }
 
     const accounts = Array.from(
-      new Set(events.map((event) => event.log.args.smartAccount)),
+      new Set(eventInsertedRaws.map((event) => event.account)),
     );
     this.subscriptionsService.refetch(accounts);
   }
@@ -99,6 +104,8 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
         });
       });
     }
+
+    return insertedEvents;
   }
 
   async handleUninstall(
@@ -108,7 +115,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     this.logger.debug(
       `Found ${events.length} uninstall events (backfill: ${backfill})`,
     );
-    await this.recurringExecutorUninstallEventsRepository
+    return await this.recurringExecutorUninstallEventsRepository
       .createQueryBuilder()
       .insert()
       .values(
@@ -123,6 +130,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
         })),
       )
       .orIgnore()
+      .returning('*')
       .execute();
   }
 
@@ -133,7 +141,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     this.logger.debug(
       `Found ${events.length} execute events (backfill: ${backfill})`,
     );
-    await this.recurringExecutorExecuteEventsRepository
+    return await this.recurringExecutorExecuteEventsRepository
       .createQueryBuilder()
       .insert()
       .values(
@@ -153,6 +161,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
         })),
       )
       .orIgnore()
+      .returning('*')
       .execute();
   }
 }

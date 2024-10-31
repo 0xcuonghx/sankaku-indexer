@@ -1,11 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
-import { getNetworkSettings } from 'src/utils/settings';
-import { parseAbi } from 'viem';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { delay } from 'src/utils/helpers';
-import moment from 'moment';
 import { SmartAccountsEntity } from './entities/smart-accounts.entity';
 
 interface SmartAccountRefetchParams {
