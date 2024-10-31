@@ -10,6 +10,7 @@ import { BlockchainClientService } from '../blockchain-client/blockchain-client.
 import { parseAbi } from 'viem';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import moment from 'moment';
 
 @Injectable()
 export class ChargeService {
@@ -34,7 +35,19 @@ export class ChargeService {
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_1AM)
-  async dailyChargeAt1AM() {}
+  async dailyCharge() {
+    this.logger.debug('Daily charge running');
+    const subscriptions = await this.subscriptionsService.getAccountsToCharge([
+      moment().startOf('day').unix(),
+      moment().endOf('day').unix(),
+    ]);
+
+    this.logger.debug(`Found ${subscriptions.length} subscriptions to charge`);
+
+    for (const subscription of subscriptions) {
+      this.charge(subscription.account as `0x${string}`);
+    }
+  }
 
   private async charge(account: `0x${string}`, attempts = 1) {
     try {

@@ -2,14 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
 import { getNetworkSettings } from 'src/utils/settings';
 import { parseAbi } from 'viem';
-import { forEach } from 'lodash';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   SubscriptionBasis,
   SubscriptionsEntity,
   SubscriptionStatus,
 } from './entities/subscriptions.entity';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual, LessThan } from 'typeorm';
 import { delay } from 'src/utils/helpers';
 import moment from 'moment';
 
@@ -141,5 +140,16 @@ export class SubscriptionsService {
 
   async getSubscription(account: `0x${string}`) {
     return this.subscriptionsRepository.findOne({ where: { account } });
+  }
+
+  async getAccountsToCharge(ranges: [number, number]) {
+    const [start, end] = ranges;
+
+    return this.subscriptionsRepository.find({
+      where: {
+        next_execution_timestamp: MoreThanOrEqual(start) && LessThan(end),
+        status: SubscriptionStatus.Active,
+      },
+    });
   }
 }
