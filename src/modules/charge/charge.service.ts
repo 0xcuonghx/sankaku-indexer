@@ -11,6 +11,10 @@ import { parseAbi } from 'viem';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import moment from 'moment';
+import {
+  SubscriptionReason,
+  SubscriptionStatus,
+} from '../subscriptions/entities/subscriptions.entity';
 
 @Injectable()
 export class ChargeService {
@@ -70,6 +74,15 @@ export class ChargeService {
     } catch (error) {
       this.logger.debug(error);
       this.logger.error(`Error charge subscription for ${account}`);
+
+      if (error.message.includes('ERC20: transfer amount exceeds balance')) {
+        this.subscriptionsService.setSubscriptionStatus(
+          account,
+          SubscriptionStatus.Expired,
+          SubscriptionReason.InsufficientFunds,
+        );
+        return;
+      }
 
       if (attempts > getNetworkSettings().maxAttempts) {
         this.logger.error(

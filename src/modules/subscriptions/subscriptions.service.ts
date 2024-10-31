@@ -5,6 +5,7 @@ import { parseAbi } from 'viem';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   SubscriptionBasis,
+  SubscriptionReason,
   SubscriptionsEntity,
   SubscriptionStatus,
 } from './entities/subscriptions.entity';
@@ -50,6 +51,7 @@ export class SubscriptionsService {
           .update()
           .set({
             status: SubscriptionStatus.Inactive,
+            reason: SubscriptionReason.Unsubscribed,
           })
           .where('account = :account', { account })
           .execute();
@@ -106,7 +108,7 @@ export class SubscriptionsService {
           amount: amount.toString(),
           status: moment(nextExecuteTimestamp).isAfter(moment())
             ? SubscriptionStatus.Active
-            : SubscriptionStatus.Expired,
+            : SubscriptionStatus.Inactive,
         })
         .orUpdate(
           [
@@ -151,5 +153,21 @@ export class SubscriptionsService {
         status: SubscriptionStatus.Active,
       },
     });
+  }
+
+  async setSubscriptionStatus(
+    account: `0x${string}`,
+    status: SubscriptionStatus,
+    reason?: SubscriptionReason,
+  ) {
+    await this.subscriptionsRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        status,
+        reason,
+      })
+      .where('account = :account', { account })
+      .execute();
   }
 }

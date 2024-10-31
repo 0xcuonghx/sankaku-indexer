@@ -12,6 +12,11 @@ export enum SubscriptionStatus {
   Expired = 'expired',
 }
 
+export enum SubscriptionReason {
+  InsufficientFunds = 'insufficient-funds',
+  Unsubscribed = 'unsubscribed',
+}
+
 @Entity({ name: 'subscriptions' })
 export class SubscriptionsEntity {
   @PrimaryColumn()
@@ -48,4 +53,7 @@ export class SubscriptionsEntity {
     default: SubscriptionStatus.Active,
   })
   status: SubscriptionStatus;
+
+  @Column({ type: 'enum', enum: SubscriptionReason, nullable: true })
+  reason: SubscriptionReason;
 }
