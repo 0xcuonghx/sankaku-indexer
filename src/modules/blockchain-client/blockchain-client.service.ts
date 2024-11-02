@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-  AbiEvent,
-  CreateEventFilterReturnType,
   createPublicClient,
   createWalletClient,
+  fallback,
   http,
   PrivateKeyAccount,
   PublicClient,
@@ -25,25 +24,31 @@ export class BlockchainClientService {
   >;
 
   constructor(private readonly configService: ConfigService) {
-    const polygonAmoyRpcUrl = this.configService.get<string>(
-      'POLYGON_AMOY_RPC_URL',
+    const polygonAmoyRpcUrls = this.configService.get<string>(
+      'POLYGON_AMOY_RPC_URLS',
     );
     const privateKey = this.configService.get<string>(
       'EXECUTOR_PRIVATE_KEY',
     ) as `0x${string}`;
 
+    const transport = fallback(
+      polygonAmoyRpcUrls.split(',').map((url) => http(url)),
+      {
+        rank: true,
+      },
+    );
     // Using any because of the following error:
     // Type instantiation is excessively deep and possibly infinite.
     // https://github.com/wevm/viem/discussions/1301
     this.client = createPublicClient({
       chain: polygonAmoy,
-      transport: http(polygonAmoyRpcUrl),
+      transport,
     }) as any;
 
     this.wallet = createWalletClient({
       account: privateKeyToAccount(privateKey),
       chain: polygonAmoy,
-      transport: http(polygonAmoyRpcUrl),
+      transport,
     });
   }
 

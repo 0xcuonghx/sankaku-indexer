@@ -65,7 +65,7 @@ export class SyncService {
   ) {
     try {
       this.logger.debug(
-        `attempts#${attempts}: Syncing from block ${fromBlock} to block ${toBlock} (backfill: ${backfill}`,
+        `attempts#${attempts}: Syncing from block ${fromBlock} to block ${toBlock} (backfill: ${backfill})`,
       );
 
       const blocks = await this.blockchainClientService.getBlocks(
@@ -126,7 +126,7 @@ export class SyncService {
       await this.eventHandlerService.handleEvents(eventsByKind, backfill);
     } catch (error) {
       this.logger.error(
-        `Error syncing from block ${fromBlock} to block ${toBlock} backfill: ${backfill}`,
+        `Error syncing from block ${fromBlock} to block ${toBlock} (backfill: ${backfill})`,
       );
       this.logger.debug(error);
 
@@ -136,13 +136,13 @@ export class SyncService {
 
       if (attempts > getNetworkSettings().maxAttempts) {
         this.logger.error(
-          `Max attempts try to sync from block ${fromBlock} to block ${toBlock} backfill: ${backfill}`,
+          `Max attempts try to sync from block ${fromBlock} to block ${toBlock} (backfill: ${backfill})`,
         );
         return;
       }
 
       this.logger.debug(
-        `Retrying sync from block ${fromBlock} to block ${toBlock} backfill: ${backfill}`,
+        `Retrying sync from block ${fromBlock} to block ${toBlock} (backfill: ${backfill})`,
       );
       await delay(getNetworkSettings().retryDelayTime);
       this.sync(fromBlock, toBlock, backfill, attempts + 1);
