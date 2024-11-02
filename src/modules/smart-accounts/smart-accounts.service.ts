@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SmartAccountsEntity } from './entities/smart-accounts.entity';
+import { GetSmartAccountsDto } from './dtos/get-smart-accounts.dto';
 
 interface SmartAccountRefetchParams {
   account: `0x${string}`;
@@ -23,5 +24,15 @@ export class SmartAccountsService {
       .values(values)
       .orIgnore()
       .execute();
+  }
+
+  async getSmartAccounts(args: GetSmartAccountsDto) {
+    const query = this.smartAccountsRepository.createQueryBuilder();
+
+    if (args.owner) {
+      query.where('owner = :owner', { owner: args.owner });
+    }
+
+    return query.getMany();
   }
 }
