@@ -6,6 +6,7 @@ import { BlockchainClientService } from '../blockchain-client/blockchain-client.
 import { parseAbi } from 'viem';
 import { getNetworkSettings } from 'src/utils/settings';
 import { delay } from 'src/utils/helpers';
+import { GetTokenBalancesDto } from './dtos/get-token-balances.dto';
 
 interface TokenBalanceRefetchParams {
   account: `0x${string}`;
@@ -71,5 +72,19 @@ export class TokenBalancesService {
       await delay(getNetworkSettings().retryDelayTime);
       this.refetchByAccount(account, token, attempts + 1);
     }
+  }
+
+  async getTokenBalances(args: GetTokenBalancesDto) {
+    const query = this.tokenBalancesRepository.createQueryBuilder();
+
+    if (args.account) {
+      query.andWhere('account = :account', { account: args.account });
+    }
+
+    if (args.token) {
+      query.andWhere('token = :token', { token: args.token });
+    }
+
+    return query.getMany();
   }
 }

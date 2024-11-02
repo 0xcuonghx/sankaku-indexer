@@ -30,7 +30,7 @@ export class SmartAccountsService {
     const query = this.smartAccountsRepository.createQueryBuilder();
 
     if (args.owner) {
-      query.where('owner = :owner', { owner: args.owner });
+      query.andWhere('owner = :owner', { owner: args.owner });
     }
 
     return query.getMany();
