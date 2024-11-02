@@ -13,6 +13,7 @@ import {
 import { Repository, MoreThanOrEqual, LessThan } from 'typeorm';
 import { delay } from 'src/utils/helpers';
 import moment from 'moment';
+import { GetSubscriptionsDto } from './dtos/get-subscriptions.dto';
 
 @Injectable()
 export class SubscriptionsService {
@@ -174,5 +175,15 @@ export class SubscriptionsService {
       })
       .where('account = :account', { account })
       .execute();
+  }
+
+  async getSubscriptions(args: GetSubscriptionsDto) {
+    const query = this.subscriptionsRepository.createQueryBuilder();
+
+    if (args.account) {
+      query.andWhere('account = :account', { account: args.account });
+    }
+
+    return query.getMany();
   }
 }
