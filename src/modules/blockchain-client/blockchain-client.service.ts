@@ -9,30 +9,24 @@ import {
   PublicClient,
   Transport,
   WalletClient,
+  Chain,
 } from 'viem';
-import { polygonAmoy } from 'viem/chains';
-import _ from 'lodash';
+import { range } from 'lodash';
 import { privateKeyToAccount } from 'viem/accounts';
 
 @Injectable()
 export class BlockchainClientService {
-  private client: PublicClient<Transport, typeof polygonAmoy>;
-  private wallet: WalletClient<
-    Transport,
-    typeof polygonAmoy,
-    PrivateKeyAccount
-  >;
+  private client: PublicClient<Transport, Chain>;
+  private wallet: WalletClient<Transport, Chain, PrivateKeyAccount>;
 
   constructor(private readonly configService: ConfigService) {
-    const polygonAmoyRpcUrls = this.configService.get<string>(
-      'POLYGON_AMOY_RPC_URLS',
-    );
+    const rpcUrls = this.configService.get<string>('RPC_URLS');
     const privateKey = this.configService.get<string>(
       'EXECUTOR_PRIVATE_KEY',
     ) as `0x${string}`;
 
     const transport = fallback(
-      polygonAmoyRpcUrls.split(',').map((url) => http(url)),
+      rpcUrls.split(',').map((url) => http(url)),
       {
         rank: true,
       },
@@ -41,13 +35,11 @@ export class BlockchainClientService {
     // Type instantiation is excessively deep and possibly infinite.
     // https://github.com/wevm/viem/discussions/1301
     this.client = createPublicClient({
-      chain: polygonAmoy,
       transport,
     }) as any;
 
     this.wallet = createWalletClient({
       account: privateKeyToAccount(privateKey),
-      chain: polygonAmoy,
       transport,
     });
   }
@@ -58,21 +50,17 @@ export class BlockchainClientService {
 
   async getBlocks(fromBlock: number, toBlock: number) {
     return Promise.all(
-      _.range(fromBlock, toBlock + 1).map((blockNumber) =>
+      range(fromBlock, toBlock + 1).map((blockNumber) =>
         this.client.getBlock({ blockNumber: BigInt(blockNumber) }),
       ),
     );
   }
 
-  get publicClient(): PublicClient<Transport, typeof polygonAmoy> {
+  get publicClient(): PublicClient<Transport, Chain> {
     return this.client;
   }
 
-  get walletClient(): WalletClient<
-    Transport,
-    typeof polygonAmoy,
-    PrivateKeyAccount
-  > {
+  get walletClient(): WalletClient<Transport, Chain, PrivateKeyAccount> {
     return this.wallet;
   }
 }

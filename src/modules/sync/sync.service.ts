@@ -4,7 +4,7 @@ import { getEventInterfaces } from 'src/abis';
 import { EnhancedEvent, EnhancedEventsByKind } from 'src/types/event.type';
 import { EventHandlerService } from '../event-handler/event-handler.service';
 import { delay } from 'src/utils/helpers';
-import { getNetworkSettings } from 'src/utils/settings';
+import { getNetworkSettings } from 'src/config/network.config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlockEntity } from './entities/block.entity';
 import { Repository } from 'typeorm';
@@ -134,7 +134,7 @@ export class SyncService {
         this.logger.debug('Rate limited');
       }
 
-      if (attempts > getNetworkSettings().maxAttempts) {
+      if (attempts > getNetworkSettings().maxRetryAttempts) {
         this.logger.error(
           `Max attempts try to sync from block ${fromBlock} to block ${toBlock} (backfill: ${backfill})`,
         );

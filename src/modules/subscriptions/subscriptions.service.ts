@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
-import { getNetworkSettings } from 'src/utils/settings';
+import { getNetworkSettings } from 'src/config/network.config';
 import { parseAbi } from 'viem';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -134,7 +134,7 @@ export class SubscriptionsService {
       this.logger.debug(error);
       this.logger.error(`Error refetching subscription for ${account}`);
 
-      if (attempts > getNetworkSettings().maxAttempts) {
+      if (attempts > getNetworkSettings().maxRetryAttempts) {
         this.logger.error(
           `Max attempts try to refetch subscription for ${account}`,
         );

@@ -5,11 +5,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ChargeModule } from './modules/charge/charge.module';
+import { validate } from './config/env.validation';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      validate,
+    }),
     EventEmitterModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

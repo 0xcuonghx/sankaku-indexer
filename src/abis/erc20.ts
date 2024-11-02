@@ -1,5 +1,5 @@
 import { EventInterface } from 'src/types/event.type';
-import { getNetworkSettings } from 'src/utils/settings';
+import { getNetworkSettings } from 'src/config/network.config';
 import { parseAbiItem } from 'viem';
 
 export const transfer: EventInterface = {

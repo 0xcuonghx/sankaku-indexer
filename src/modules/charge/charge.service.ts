@@ -5,7 +5,7 @@ import {
   RecurringExecutorInstalledEvent,
 } from 'src/types/internal-event.type';
 import { delay } from 'src/utils/helpers';
-import { getNetworkSettings } from 'src/utils/settings';
+import { getNetworkSettings } from 'src/config/network.config';
 import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
 import { parseAbi } from 'viem';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
@@ -84,7 +84,7 @@ export class ChargeService {
         return;
       }
 
-      if (attempts > getNetworkSettings().maxAttempts) {
+      if (attempts > getNetworkSettings().maxRetryAttempts) {
         this.logger.error(
           `Max attempts try to charge subscription for ${account}`,
         );

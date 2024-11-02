@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
 import { SyncService } from '../sync/sync.service';
-import { getNetworkSettings } from 'src/utils/settings';
+import { getNetworkSettings } from 'src/config/network.config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LastSyncBlockEntity } from './entites/last-sync-block.entity';

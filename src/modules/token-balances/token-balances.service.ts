@@ -4,7 +4,7 @@ import { TokenBalancesEntity } from './entities/token-balances.entity';
 import { Repository } from 'typeorm';
 import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
 import { parseAbi } from 'viem';
-import { getNetworkSettings } from 'src/utils/settings';
+import { getNetworkSettings } from 'src/config/network.config';
 import { delay } from 'src/utils/helpers';
 import { GetTokenBalancesDto } from './dtos/get-token-balances.dto';
 
@@ -62,7 +62,7 @@ export class TokenBalancesService {
       this.logger.debug(error);
       this.logger.error(`Error token balances for ${account}`);
 
-      if (attempts > getNetworkSettings().maxAttempts) {
+      if (attempts > getNetworkSettings().maxRetryAttempts) {
         this.logger.error(
           `Max attempts try to refetch subscription for ${account}`,
         );
