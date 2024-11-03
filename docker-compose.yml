@@ -18,7 +18,7 @@ services:
     container_name: cuonghx-sankaku-indexer
     environment:
       - PORT=3000
-      - POSTGRES_URL=postgresql://postgres:postgres@sankaku-indexer-postgres:5432/postgres
+      - POSTGRES_URL=postgresql://postgres:postgres@cuonghx-sankaku-indexer-postgres:5432/postgres
       - RPC_URLS=${RPC_URLS}
       - EXECUTOR_PRIVATE_KEY=${EXECUTOR_PRIVATE_KEY}
       - SUPPORTED_CURRENCY_ADDRESSES=${SUPPORTED_CURRENCY_ADDRESSES}
