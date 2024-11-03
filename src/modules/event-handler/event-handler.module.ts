@@ -12,6 +12,7 @@ import { SmartWalletCreateEventsEntity } from './entities/smart-wallet-create-ev
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { TokenBalancesModule } from '../token-balances/token-balances.module';
 import { SmartAccountsModule } from '../smart-accounts/smart-accounts.module';
+import { BlockEntity } from '../sync/entities/block.entity';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SmartAccountsModule } from '../smart-accounts/smart-accounts.module';
       RecurringExecutorUninstallEventsEntity,
       RecurringExecutorExecuteEventsEntity,
       SmartWalletCreateEventsEntity,
+      BlockEntity,
     ]),
     SubscriptionsModule,
     TokenBalancesModule,

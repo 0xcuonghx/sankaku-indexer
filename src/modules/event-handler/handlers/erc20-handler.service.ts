@@ -5,6 +5,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ERC20TransferEventsEntity } from '../entities/erc20-transfer-events.entity';
 import { Repository } from 'typeorm';
 import { TokenBalancesService } from 'src/modules/token-balances/token-balances.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ActivityType } from 'src/modules/activity-logs/entities/activity-logs.entity';
+import { BlockEntity } from 'src/modules/sync/entities/block.entity';
 
 @Injectable()
 export class ERC20HandlerService extends BaseHandlerService {
@@ -13,9 +16,12 @@ export class ERC20HandlerService extends BaseHandlerService {
   constructor(
     @InjectRepository(ERC20TransferEventsEntity)
     private erc20TransferEventsRepository: Repository<ERC20TransferEventsEntity>,
+    @InjectRepository(BlockEntity)
+    private blocksRepository: Repository<BlockEntity>,
     private readonly tokenBalancesService: TokenBalancesService,
+    eventEmitter: EventEmitter2,
   ) {
-    super();
+    super(eventEmitter);
   }
 
   async handle(
@@ -43,6 +49,7 @@ export class ERC20HandlerService extends BaseHandlerService {
       }
     }
 
+    // Refetch token balances for accounts involved in the transfer
     const fetchBalanceArgs = Array.from(
       new Set(
         eventInsertedRaw
@@ -54,6 +61,37 @@ export class ERC20HandlerService extends BaseHandlerService {
       ),
     );
     this.tokenBalancesService.refetch(fetchBalanceArgs);
+
+    // Create activity logs for the transfer events
+    if (eventInsertedRaw.length === 0) {
+      return;
+    }
+    const block = await this.blocksRepository.findOne({
+      where: { hash: eventInsertedRaw[0].block_hash },
+    });
+
+    this.createActivityLog(
+      eventInsertedRaw
+        .map((event) => [
+          {
+            account: event.from,
+            type: ActivityType.TokenTransferred,
+            timestamp: block.timestamp,
+            data: { to: event.to, token: event.address, amount: event.amount },
+          },
+          {
+            account: event.to,
+            type: ActivityType.TokenReceived,
+            timestamp: block.timestamp,
+            data: {
+              from: event.from,
+              token: event.address,
+              amount: event.amount,
+            },
+          },
+        ])
+        .flat(),
+    );
   }
 
   async handleTransfer(

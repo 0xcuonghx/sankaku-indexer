@@ -5,6 +5,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SmartWalletCreateEventsEntity } from '../entities/smart-wallet-create-events.entity';
 import { SmartAccountsService } from 'src/modules/smart-accounts/smart-accounts.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ActivityType } from 'src/modules/activity-logs/entities/activity-logs.entity';
+import { BlockEntity } from 'src/modules/sync/entities/block.entity';
 
 @Injectable()
 export class FactoryHandlerService extends BaseHandlerService {
@@ -13,9 +16,12 @@ export class FactoryHandlerService extends BaseHandlerService {
   constructor(
     @InjectRepository(SmartWalletCreateEventsEntity)
     private smartWalletCreateEventsRepository: Repository<SmartWalletCreateEventsEntity>,
+    @InjectRepository(BlockEntity)
+    private blocksRepository: Repository<BlockEntity>,
     private readonly smartAccountsService: SmartAccountsService,
+    eventEmitter: EventEmitter2,
   ) {
-    super();
+    super(eventEmitter);
   }
 
   async handle(events: EnhancedEvent[], backfill = false) {
@@ -71,6 +77,21 @@ export class FactoryHandlerService extends BaseHandlerService {
       }));
 
       await this.smartAccountsService.insert(accounts);
+
+      // Create activity logs
+      if (insertedEvents.raw.length !== 0) {
+        const block = await this.blocksRepository.findOne({
+          where: { hash: insertedEvents.raw[0].block_hash },
+        });
+        this.createActivityLog(
+          insertedEvents.raw.map((event) => ({
+            account: event.account,
+            type: ActivityType.WalletCreated,
+            timestamp: block.timestamp,
+            data: { owner: event.owner, salt: event.salt },
+          })),
+        );
+      }
     } catch (error) {
       this.logger.debug(error);
       this.logger.error(`Error handling create events: ${error.message}`);

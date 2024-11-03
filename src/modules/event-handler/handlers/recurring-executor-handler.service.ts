@@ -9,6 +9,8 @@ import { RecurringExecutorUninstallEventsEntity } from '../entities/recurring-ex
 import { SubscriptionsService } from 'src/modules/subscriptions/subscriptions.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventChannel } from 'src/types/internal-event.type';
+import { BlockEntity } from 'src/modules/sync/entities/block.entity';
+import { ActivityType } from 'src/modules/activity-logs/entities/activity-logs.entity';
 
 @Injectable()
 export class RecurringExecutorHandlerService extends BaseHandlerService {
@@ -21,10 +23,12 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     private recurringExecutorInstallEventsRepository: Repository<RecurringExecutorInstallEventsEntity>,
     @InjectRepository(RecurringExecutorUninstallEventsEntity)
     private recurringExecutorUninstallEventsRepository: Repository<RecurringExecutorUninstallEventsEntity>,
+    @InjectRepository(BlockEntity)
+    private blocksRepository: Repository<BlockEntity>,
     private readonly subscriptionsService: SubscriptionsService,
-    private eventEmitter: EventEmitter2,
+    eventEmitter: EventEmitter2,
   ) {
-    super();
+    super(eventEmitter);
   }
 
   async handle(
@@ -105,6 +109,28 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
       });
     }
 
+    // Create activity logs
+    if (insertedEvents.raw.length !== 0) {
+      const block = await this.blocksRepository.findOne({
+        where: { hash: insertedEvents.raw[0].block_hash },
+      });
+
+      this.createActivityLog(
+        insertedEvents.raw.map((event) => ({
+          account: event.account,
+          type: ActivityType.RecurringExecutionInstalled,
+          timestamp: block.timestamp,
+          data: {
+            planId: event.planId,
+            basis: event.basis,
+            receiver: event.receiver,
+            token: event.token,
+            amount: event.amount,
+          },
+        })),
+      );
+    }
+
     return insertedEvents;
   }
 
@@ -115,7 +141,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     this.logger.debug(
       `Found ${events.length} uninstall events (backfill: ${backfill})`,
     );
-    return await this.recurringExecutorUninstallEventsRepository
+    const insertedEvents = await this.recurringExecutorUninstallEventsRepository
       .createQueryBuilder()
       .insert()
       .values(
@@ -132,6 +158,23 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
       .orIgnore()
       .returning('*')
       .execute();
+
+    // Create activity logs
+    if (insertedEvents.raw.length !== 0) {
+      const block = await this.blocksRepository.findOne({
+        where: { hash: insertedEvents.raw[0].block_hash },
+      });
+
+      this.createActivityLog(
+        insertedEvents.raw.map((event) => ({
+          account: event.account,
+          type: ActivityType.RecurringExecutionUninstalled,
+          timestamp: block.timestamp,
+        })),
+      );
+    }
+
+    return insertedEvents;
   }
 
   async handleExecute(
@@ -141,7 +184,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     this.logger.debug(
       `Found ${events.length} execute events (backfill: ${backfill})`,
     );
-    return await this.recurringExecutorExecuteEventsRepository
+    const insertedEvents = await this.recurringExecutorExecuteEventsRepository
       .createQueryBuilder()
       .insert()
       .values(
@@ -163,5 +206,29 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
       .orIgnore()
       .returning('*')
       .execute();
+
+    // Create activity logs
+    if (insertedEvents.raw.length !== 0) {
+      const block = await this.blocksRepository.findOne({
+        where: { hash: insertedEvents.raw[0].block_hash },
+      });
+
+      this.createActivityLog(
+        insertedEvents.raw.map((event) => ({
+          account: event.account,
+          type: ActivityType.RecurringExecutionExecuted,
+          timestamp: block.timestamp,
+          data: {
+            planId: event.planId,
+            basis: event.basis,
+            receiver: event.receiver,
+            token: event.token,
+            amount: event.amount,
+          },
+        })),
+      );
+    }
+
+    return insertedEvents;
   }
 }
