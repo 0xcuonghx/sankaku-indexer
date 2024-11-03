@@ -7,6 +7,7 @@ import {
 } from 'src/types/internal-event.type';
 import { ActivityLogsEntity } from './entities/activity-logs.entity';
 import { Repository } from 'typeorm';
+import { GetActivityLogsDto } from './dtos/get-activity-logs.dto';
 
 @Injectable()
 export class ActivityLogsService {
@@ -29,5 +30,17 @@ export class ActivityLogsService {
         })),
       )
       .execute();
+  }
+
+  async getActivityLogs(args: GetActivityLogsDto) {
+    const query = this.activityLogsRepository.createQueryBuilder();
+
+    if (args.account) {
+      query.andWhere('account = :account', { account: args.account });
+    }
+
+    query.orderBy('timestamp', 'DESC');
+
+    return query.getMany();
   }
 }
