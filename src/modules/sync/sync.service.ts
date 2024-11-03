@@ -5,9 +5,7 @@ import { EnhancedEvent, EnhancedEventsByKind } from 'src/types/event.type';
 import { EventHandlerService } from '../event-handler/event-handler.service';
 import { delay } from 'src/utils/helpers';
 import { getNetworkSettings } from 'src/config/network.config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { BlockEntity } from './entities/block.entity';
-import { Repository } from 'typeorm';
+import { BlocksService } from '../blocks/blocks.service';
 
 @Injectable()
 export class SyncService {
@@ -15,8 +13,7 @@ export class SyncService {
   constructor(
     private readonly blockchainClientService: BlockchainClientService,
     private readonly eventHandlerService: EventHandlerService,
-    @InjectRepository(BlockEntity)
-    private blockRepository: Repository<BlockEntity>,
+    private readonly blocksService: BlocksService,
   ) {}
 
   async realtimeSync(fromBlock: number, toBlock: number) {
@@ -79,18 +76,7 @@ export class SyncService {
         );
       }
 
-      await this.blockRepository
-        .createQueryBuilder()
-        .insert()
-        .values(
-          blocks.map((block) => ({
-            hash: block.hash,
-            block: Number(block.number),
-            timestamp: Number(block.timestamp),
-          })),
-        )
-        .orIgnore()
-        .execute();
+      await this.blocksService.insert(blocks);
 
       const eventInterfaces = getEventInterfaces();
       const eventAbis = eventInterfaces.map((iface) => iface.abi);

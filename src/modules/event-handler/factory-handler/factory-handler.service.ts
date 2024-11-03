@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BaseHandlerService } from './base-handler.service';
 import { EnhancedEvent } from 'src/types/event.type';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SmartWalletCreateEventsEntity } from '../entities/smart-wallet-create-events.entity';
+import { SmartWalletCreateEventsEntity } from '../factory-handler/entities/smart-wallet-create-events.entity';
 import { SmartAccountsService } from 'src/modules/smart-accounts/smart-accounts.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ActivityType } from 'src/modules/activity-logs/entities/activity-logs.entity';
-import { BlockEntity } from 'src/modules/sync/entities/block.entity';
+import { BaseHandlerService } from '../types/base-handler.service';
+import { BlocksService } from 'src/modules/blocks/blocks.service';
 
 @Injectable()
 export class FactoryHandlerService extends BaseHandlerService {
@@ -16,9 +16,8 @@ export class FactoryHandlerService extends BaseHandlerService {
   constructor(
     @InjectRepository(SmartWalletCreateEventsEntity)
     private smartWalletCreateEventsRepository: Repository<SmartWalletCreateEventsEntity>,
-    @InjectRepository(BlockEntity)
-    private blocksRepository: Repository<BlockEntity>,
     private readonly smartAccountsService: SmartAccountsService,
+    private readonly blocksService: BlocksService,
     eventEmitter: EventEmitter2,
   ) {
     super(eventEmitter);
@@ -80,9 +79,9 @@ export class FactoryHandlerService extends BaseHandlerService {
 
       // Create activity logs
       if (insertedEvents.raw.length !== 0) {
-        const block = await this.blocksRepository.findOne({
-          where: { hash: insertedEvents.raw[0].block_hash },
-        });
+        const block = await this.blocksService.getBlockByHash(
+          insertedEvents.raw[0].block_hash,
+        );
         this.createActivityLog(
           insertedEvents.raw.map((event) => ({
             account: event.account,

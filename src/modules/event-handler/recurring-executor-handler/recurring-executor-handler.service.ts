@@ -1,16 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BaseHandlerService } from './base-handler.service';
 import { EnhancedEvent } from 'src/types/event.type';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InsertResult, Repository } from 'typeorm';
-import { RecurringExecutorExecuteEventsEntity } from '../entities/recurring-executor-execute.entity';
-import { RecurringExecutorInstallEventsEntity } from '../entities/recurring-executor-install.entity';
-import { RecurringExecutorUninstallEventsEntity } from '../entities/recurring-executor-uninstall.entity';
+
 import { SubscriptionsService } from 'src/modules/subscriptions/subscriptions.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventChannel } from 'src/types/internal-event.type';
-import { BlockEntity } from 'src/modules/sync/entities/block.entity';
 import { ActivityType } from 'src/modules/activity-logs/entities/activity-logs.entity';
+import { BaseHandlerService } from '../types/base-handler.service';
+import { RecurringExecutorExecuteEventsEntity } from './entities/recurring-executor-execute-events.entity';
+import { RecurringExecutorInstallEventsEntity } from './entities/recurring-executor-install-events.entity';
+import { RecurringExecutorUninstallEventsEntity } from './entities/recurring-executor-uninstall-events.entity';
+import { BlocksService } from 'src/modules/blocks/blocks.service';
 
 @Injectable()
 export class RecurringExecutorHandlerService extends BaseHandlerService {
@@ -23,8 +24,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     private recurringExecutorInstallEventsRepository: Repository<RecurringExecutorInstallEventsEntity>,
     @InjectRepository(RecurringExecutorUninstallEventsEntity)
     private recurringExecutorUninstallEventsRepository: Repository<RecurringExecutorUninstallEventsEntity>,
-    @InjectRepository(BlockEntity)
-    private blocksRepository: Repository<BlockEntity>,
+    private readonly blocksService: BlocksService,
     private readonly subscriptionsService: SubscriptionsService,
     eventEmitter: EventEmitter2,
   ) {
@@ -111,9 +111,9 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
 
     // Create activity logs
     if (insertedEvents.raw.length !== 0) {
-      const block = await this.blocksRepository.findOne({
-        where: { hash: insertedEvents.raw[0].block_hash },
-      });
+      const block = await this.blocksService.getBlockByHash(
+        insertedEvents.raw[0].block_hash,
+      );
 
       this.createActivityLog(
         insertedEvents.raw.map((event) => ({
@@ -161,9 +161,9 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
 
     // Create activity logs
     if (insertedEvents.raw.length !== 0) {
-      const block = await this.blocksRepository.findOne({
-        where: { hash: insertedEvents.raw[0].block_hash },
-      });
+      const block = await this.blocksService.getBlockByHash(
+        insertedEvents.raw[0].block_hash,
+      );
 
       this.createActivityLog(
         insertedEvents.raw.map((event) => ({
@@ -209,9 +209,9 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
 
     // Create activity logs
     if (insertedEvents.raw.length !== 0) {
-      const block = await this.blocksRepository.findOne({
-        where: { hash: insertedEvents.raw[0].block_hash },
-      });
+      const block = await this.blocksService.getBlockByHash(
+        insertedEvents.raw[0].block_hash,
+      );
 
       this.createActivityLog(
         insertedEvents.raw.map((event) => ({

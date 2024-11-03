@@ -6,7 +6,10 @@ import {
 } from 'src/types/internal-event.type';
 
 export class BaseHandlerService {
-  constructor(public eventEmitter: EventEmitter2) {}
+  protected eventEmitter: EventEmitter2;
+  constructor(eventEmitter: EventEmitter2) {
+    this.eventEmitter = eventEmitter;
+  }
 
   async handle(events: EnhancedEvent[], backfill = false) {
     throw new Error('Method not implemented.');

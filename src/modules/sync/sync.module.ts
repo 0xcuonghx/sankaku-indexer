@@ -3,14 +3,10 @@ import { SyncService } from './sync.service';
 import { BlockchainClientModule } from '../blockchain-client/blockchain-client.module';
 import { EventHandlerModule } from '../event-handler/event-handler.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BlockEntity } from './entities/block.entity';
+import { BlocksModule } from '../blocks/blocks.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([BlockEntity]),
-    BlockchainClientModule,
-    EventHandlerModule,
-  ],
+  imports: [BlockchainClientModule, EventHandlerModule, BlocksModule],
   providers: [SyncService],
   exports: [SyncService],
 })

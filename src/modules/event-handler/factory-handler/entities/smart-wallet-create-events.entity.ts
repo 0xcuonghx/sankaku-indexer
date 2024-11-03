@@ -1,5 +1,5 @@
 import { Column, Entity } from 'typeorm';
-import { BaseEventsEntity } from './base-events.entity';
+import { BaseEventsEntity } from '../../types/base-events.entity';
 
 @Entity({ name: 'smart_wallet_create_events' })
 export class SmartWalletCreateEventsEntity extends BaseEventsEntity {

@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EnhancedEvent } from 'src/types/event.type';
-import { BaseHandlerService } from './base-handler.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ERC20TransferEventsEntity } from '../entities/erc20-transfer-events.entity';
 import { Repository } from 'typeorm';
 import { TokenBalancesService } from 'src/modules/token-balances/token-balances.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ActivityType } from 'src/modules/activity-logs/entities/activity-logs.entity';
-import { BlockEntity } from 'src/modules/sync/entities/block.entity';
+import { BaseHandlerService } from '../types/base-handler.service';
+import { ERC20TransferEventsEntity } from './entities/erc20-transfer-events.entity';
+import { BlocksService } from 'src/modules/blocks/blocks.service';
 
 @Injectable()
 export class ERC20HandlerService extends BaseHandlerService {
@@ -16,9 +16,8 @@ export class ERC20HandlerService extends BaseHandlerService {
   constructor(
     @InjectRepository(ERC20TransferEventsEntity)
     private erc20TransferEventsRepository: Repository<ERC20TransferEventsEntity>,
-    @InjectRepository(BlockEntity)
-    private blocksRepository: Repository<BlockEntity>,
     private readonly tokenBalancesService: TokenBalancesService,
+    private readonly blocksService: BlocksService,
     eventEmitter: EventEmitter2,
   ) {
     super(eventEmitter);
@@ -66,9 +65,9 @@ export class ERC20HandlerService extends BaseHandlerService {
     if (eventInsertedRaw.length === 0) {
       return;
     }
-    const block = await this.blocksRepository.findOne({
-      where: { hash: eventInsertedRaw[0].block_hash },
-    });
+    const block = await this.blocksService.getBlockByHash(
+      eventInsertedRaw[0].block_hash,
+    );
 
     this.createActivityLog(
       eventInsertedRaw

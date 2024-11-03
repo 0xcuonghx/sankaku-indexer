@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity({ name: 'blocks' })
-export class BlockEntity {
+export class BlocksEntity {
   @PrimaryColumn()
   hash: string;
 

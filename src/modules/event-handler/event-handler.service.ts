@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { EnhancedEventsByKind } from 'src/types/event.type';
-import { ERC20HandlerService } from './handlers/erc20-handler.service';
-import { FactoryHandlerService } from './handlers/factory-handler.service';
-import { RecurringExecutorHandlerService } from './handlers/recurring-executor-handler.service';
+import { RecurringExecutorHandlerService } from './recurring-executor-handler/recurring-executor-handler.service';
+import { ERC20HandlerService } from './erc20-handler/erc20-handler.service';
+import { FactoryHandlerService } from './factory-handler/factory-handler.service';
 
 @Injectable()
 export class EventHandlerService {

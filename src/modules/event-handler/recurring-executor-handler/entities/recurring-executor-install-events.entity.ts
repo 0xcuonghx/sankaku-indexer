@@ -1,5 +1,5 @@
 import { Column, Entity } from 'typeorm';
-import { BaseEventsEntity } from './base-events.entity';
+import { BaseEventsEntity } from '../../types/base-events.entity';
 
 @Entity({ name: 'recurring_executor_install_events' })
 export class RecurringExecutorInstallEventsEntity extends BaseEventsEntity {

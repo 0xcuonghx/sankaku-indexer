@@ -1,39 +1,16 @@
 import { Module } from '@nestjs/common';
 import { EventHandlerService } from './event-handler.service';
-import { ERC20HandlerService } from './handlers/erc20-handler.service';
-import { FactoryHandlerService } from './handlers/factory-handler.service';
-import { RecurringExecutorHandlerService } from './handlers/recurring-executor-handler.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ERC20TransferEventsEntity } from './entities/erc20-transfer-events.entity';
-import { RecurringExecutorInstallEventsEntity } from './entities/recurring-executor-install.entity';
-import { RecurringExecutorUninstallEventsEntity } from './entities/recurring-executor-uninstall.entity';
-import { RecurringExecutorExecuteEventsEntity } from './entities/recurring-executor-execute.entity';
-import { SmartWalletCreateEventsEntity } from './entities/smart-wallet-create-events.entity';
-import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
-import { TokenBalancesModule } from '../token-balances/token-balances.module';
-import { SmartAccountsModule } from '../smart-accounts/smart-accounts.module';
-import { BlockEntity } from '../sync/entities/block.entity';
+import { ERC20HandlerModule } from './erc20-handler/erc20-handler.module';
+import { FactoryHandlerModule } from './factory-handler/factory-handler.module';
+import { RecurringExecutorHandlerModule } from './recurring-executor-handler/recurring-executor-handler.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      ERC20TransferEventsEntity,
-      RecurringExecutorInstallEventsEntity,
-      RecurringExecutorUninstallEventsEntity,
-      RecurringExecutorExecuteEventsEntity,
-      SmartWalletCreateEventsEntity,
-      BlockEntity,
-    ]),
-    SubscriptionsModule,
-    TokenBalancesModule,
-    SmartAccountsModule,
+    ERC20HandlerModule,
+    FactoryHandlerModule,
+    RecurringExecutorHandlerModule,
   ],
-  providers: [
-    EventHandlerService,
-    ERC20HandlerService,
-    FactoryHandlerService,
-    RecurringExecutorHandlerService,
-  ],
+  providers: [EventHandlerService],
   exports: [EventHandlerService],
 })
 export class EventHandlerModule {}
