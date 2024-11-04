@@ -41,6 +41,16 @@ export class ActivityLogsService {
 
     query.orderBy('timestamp', 'DESC');
 
-    return query.getMany();
+    query.skip((args.page - 1) * args.limit).take(args.limit);
+
+    const [data, total] = await query.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page: args.page,
+      limit: args.limit,
+      lastPage: Math.ceil(total / args.limit),
+    };
   }
 }
