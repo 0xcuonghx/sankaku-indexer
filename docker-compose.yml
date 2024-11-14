@@ -11,6 +11,15 @@ services:
       - POSTGRES_DB=postgres
     volumes:
       - cuonghx-sankaku-indexer-postgres-data:/var/lib/postgresql/data
+  cuonghx-sankaku-indexer-redis:
+    container_name: cuonghx-sankaku-indexer-redis
+    image: redis:latest
+    ports:
+      - 4003:6379
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    volumes:
+      - cuonghx-sankaku-indexer-redis-data:/data
   cuonghx-sankaku-indexer:
     build:
       context: .
@@ -19,6 +28,8 @@ services:
     environment:
       - PORT=3000
       - POSTGRES_URL=postgresql://postgres:postgres@cuonghx-sankaku-indexer-postgres:5432/postgres
+      - REDIS_HOST=cuonghx-sankaku-indexer-redis
+      - REDIS_PORT=6379
       - RPC_URLS=${RPC_URLS}
       - EXECUTOR_PRIVATE_KEY=${EXECUTOR_PRIVATE_KEY}
       - SUPPORTED_CURRENCY_ADDRESSES=${SUPPORTED_CURRENCY_ADDRESSES}
@@ -33,5 +44,7 @@ services:
       - '4001:3000'
     depends_on:
       - cuonghx-sankaku-indexer-postgres
+      - cuonghx-sankaku-redis
 volumes:
   cuonghx-sankaku-indexer-postgres-data:
+  cuonghx-sankaku-indexer-redis-data:

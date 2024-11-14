@@ -1,11 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
 import { SyncService } from '../sync/sync.service';
 import { getNetworkSettings } from 'src/config/network.config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LastSyncBlockEntity } from './entites/last-sync-block.entity';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class BlockScannerService {
@@ -15,8 +15,7 @@ export class BlockScannerService {
   constructor(
     private readonly blockchainClientService: BlockchainClientService,
     private readonly syncService: SyncService,
-    @InjectRepository(LastSyncBlockEntity)
-    private lastSyncBlockRepository: Repository<LastSyncBlockEntity>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   @Cron(`*/${getNetworkSettings().blockScanInterval} * * * * *`)
@@ -42,8 +41,8 @@ export class BlockScannerService {
 
       // Fetch the last synced blocked for the current contract type (if it exists)
       let localBlock =
-        (await this.lastSyncBlockRepository.findOne({ where: { id: 1 } }))
-          ?.last_synced_block || getNetworkSettings().startBlock + 1;
+        (await this.cacheManager.get<number>('last_synced_block')) ||
+        getNetworkSettings().startBlock + 1;
 
       if (localBlock >= headBlock) {
         // Nothing to sync
@@ -63,12 +62,7 @@ export class BlockScannerService {
       // which is exactly what we need (since events for the latest blocks might
       // be missing due to upstream chain reorgs):
       // https://ethereum.stackexchange.com/questions/109660/eth-getlogs-and-some-missing-logs
-      await this.lastSyncBlockRepository
-        .createQueryBuilder()
-        .insert()
-        .values({ id: 1, last_synced_block: headBlock - 5 })
-        .orUpdate(['last_synced_block'], ['id'])
-        .execute();
+      await this.cacheManager.set('last_synced_block', headBlock - 5);
 
       this.lock = false;
     } catch (error) {

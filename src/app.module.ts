@@ -10,6 +10,8 @@ import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module
 import { SmartAccountsModule } from './modules/smart-accounts/smart-accounts.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { TokenBalancesModule } from './modules/token-balances/token-balances.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-ioredis-yet';
 
 @Module({
   imports: [
@@ -26,6 +28,20 @@ import { TokenBalancesModule } from './modules/token-balances/token-balances.mod
         autoLoadEntities: true,
         synchronize: false,
       }),
+      inject: [ConfigService],
+    }),
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      isGlobal: true,
+      useFactory: async (configService: ConfigService) => {
+        const store = await redisStore({
+          host: configService.get('REDIS_HOST'),
+          port: configService.get('REDIS_PORT'),
+        });
+        return {
+          store,
+        };
+      },
       inject: [ConfigService],
     }),
     BlockScannerModule,
