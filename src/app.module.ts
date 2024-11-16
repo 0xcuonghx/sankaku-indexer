@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { BlockScannerModule } from './modules/block-scanner/block-scanner.module';
+import { BlockScannerModule } from './modules/jobs/block-scanner/block-scanner.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';

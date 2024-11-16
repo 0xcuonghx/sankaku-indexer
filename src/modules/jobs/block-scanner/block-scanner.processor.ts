@@ -3,8 +3,8 @@ import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { getNetworkSettings } from 'src/config/network.config';
 import { QueueType } from 'src/types/queue.type';
-import { SyncService } from '../sync/sync.service';
-import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
+import { SyncService } from '../../sync/sync.service';
+import { BlockchainClientService } from '../../blockchain-client/blockchain-client.service';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Processor(QueueType.BlockScanner, { concurrency: 1 })
@@ -19,7 +19,7 @@ export class BlockScannerProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job) {
+  async process() {
     try {
       this.logger.debug(
         `Scanning blocks every ${getNetworkSettings().blockScanInterval} seconds`,
