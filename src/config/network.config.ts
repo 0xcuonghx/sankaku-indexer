@@ -15,7 +15,6 @@ export const getNetworkSettings = () => {
       process.env.RECURRING_EXECUTOR_ADDRESS.toLowerCase(),
     blocksPerBatch: Number(process.env.BLOCKS_PER_BATCH),
     blockScanInterval: Number(process.env.BLOCK_SCAN_INTERVAL),
-    backfillDelayTime: Number(process.env.BACKFILL_DELAY_TIME),
     retryDelayTime: Number(process.env.RETRY_DELAY_TIME),
     maxRetryAttempts: Number(process.env.MAX_RETRY_ATTEMPTS),
     startBlock: Number(process.env.START_BLOCK),

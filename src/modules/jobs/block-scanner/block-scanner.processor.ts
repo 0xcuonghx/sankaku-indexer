@@ -1,13 +1,15 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
-import { Job } from 'bullmq';
 import { getNetworkSettings } from 'src/config/network.config';
 import { QueueType } from 'src/types/queue.type';
 import { SyncService } from '../../sync/sync.service';
 import { BlockchainClientService } from '../../blockchain-client/blockchain-client.service';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { BackfillSyncService } from '../backfill-sync/backfill-sync.service';
 
-@Processor(QueueType.BlockScanner, { concurrency: 1 })
+@Processor(QueueType.BlockScanner, {
+  concurrency: 1,
+})
 export class BlockScannerProcessor extends WorkerHost {
   private readonly logger = new Logger(BlockScannerProcessor.name);
 
@@ -15,6 +17,7 @@ export class BlockScannerProcessor extends WorkerHost {
     private readonly blockchainClientService: BlockchainClientService,
     private readonly syncService: SyncService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly backfillSyncService: BackfillSyncService,
   ) {
     super();
   }
@@ -46,11 +49,11 @@ export class BlockScannerProcessor extends WorkerHost {
       }
 
       const fromBlock = Math.max(localBlock, headBlock - maxBlocks + 1);
-      await this.syncService.realtimeSync(fromBlock, headBlock);
+      await this.syncService.sync(fromBlock, headBlock);
 
       // Queue any remaining blocks for backfilling
       if (localBlock < fromBlock) {
-        this.syncService.backfillSync(localBlock, fromBlock - 1);
+        await this.backfillSyncService.addJob(localBlock, fromBlock - 1);
       }
 
       // To avoid missing any events, save the latest synced block with a delay.

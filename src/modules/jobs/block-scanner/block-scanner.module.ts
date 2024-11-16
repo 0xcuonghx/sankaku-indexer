@@ -7,11 +7,13 @@ import { BullModule } from '@nestjs/bullmq';
 import { QueueType } from 'src/types/queue.type';
 import { BullBoardModule } from '@bull-board/nestjs';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
+import { BackfillSyncModule } from '../backfill-sync/backfill-sync.module';
 
 @Module({
   imports: [
     BlockchainClientModule,
     SyncModule,
+    BackfillSyncModule,
     BullModule.registerQueue({
       name: QueueType.BlockScanner,
     }),
