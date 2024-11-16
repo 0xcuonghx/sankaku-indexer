@@ -20,31 +20,31 @@ services:
       - REDIS_REPLICATION_MODE=master
     volumes:
       - cuonghx-sankaku-indexer-redis-data:/data
-  cuonghx-sankaku-indexer:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: cuonghx-sankaku-indexer
-    environment:
-      - PORT=3000
-      - POSTGRES_URL=postgresql://postgres:postgres@cuonghx-sankaku-indexer-postgres:5432/postgres
-      - REDIS_HOST=cuonghx-sankaku-indexer-redis
-      - REDIS_PORT=6379
-      - RPC_URLS=${RPC_URLS}
-      - EXECUTOR_PRIVATE_KEY=${EXECUTOR_PRIVATE_KEY}
-      - SUPPORTED_CURRENCY_ADDRESSES=${SUPPORTED_CURRENCY_ADDRESSES}
-      - RECURRING_EXECUTOR_ADDRESS=${RECURRING_EXECUTOR_ADDRESS}
-      - BLOCKS_PER_BATCH=${BLOCKS_PER_BATCH}
-      - BLOCK_SCAN_INTERVAL=${BLOCK_SCAN_INTERVAL}
-      - BACKFILL_DELAY_TIME=${BACKFILL_DELAY_TIME}
-      - RETRY_DELAY_TIME=${RETRY_DELAY_TIME}
-      - MAX_RETRY_ATTEMPTS=${MAX_RETRY_ATTEMPTS}
-      - START_BLOCK=${START_BLOCK}
-    ports:
-      - '4001:3000'
-    depends_on:
-      - cuonghx-sankaku-indexer-postgres
-      - cuonghx-sankaku-redis
+  # cuonghx-sankaku-indexer:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: cuonghx-sankaku-indexer
+  #   environment:
+  #     - PORT=3000
+  #     - POSTGRES_URL=postgresql://postgres:postgres@cuonghx-sankaku-indexer-postgres:5432/postgres
+  #     - REDIS_HOST=cuonghx-sankaku-indexer-redis
+  #     - REDIS_PORT=6379
+  #     - RPC_URLS=${RPC_URLS}
+  #     - EXECUTOR_PRIVATE_KEY=${EXECUTOR_PRIVATE_KEY}
+  #     - SUPPORTED_CURRENCY_ADDRESSES=${SUPPORTED_CURRENCY_ADDRESSES}
+  #     - RECURRING_EXECUTOR_ADDRESS=${RECURRING_EXECUTOR_ADDRESS}
+  #     - BLOCKS_PER_BATCH=${BLOCKS_PER_BATCH}
+  #     - BLOCK_SCAN_INTERVAL=${BLOCK_SCAN_INTERVAL}
+  #     - BACKFILL_DELAY_TIME=${BACKFILL_DELAY_TIME}
+  #     - RETRY_DELAY_TIME=${RETRY_DELAY_TIME}
+  #     - MAX_RETRY_ATTEMPTS=${MAX_RETRY_ATTEMPTS}
+  #     - START_BLOCK=${START_BLOCK}
+  #   ports:
+  #     - '4001:3000'
+  #   depends_on:
+  #     - cuonghx-sankaku-indexer-postgres
+  #     - cuonghx-sankaku-redis
 volumes:
   cuonghx-sankaku-indexer-postgres-data:
   cuonghx-sankaku-indexer-redis-data:
