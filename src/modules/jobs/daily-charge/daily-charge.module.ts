@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { InitialChargeService } from './initial-charge.service';
+import { DailyChargeService } from './daily-charge.service';
 import { BullModule } from '@nestjs/bullmq';
 import { QueueType } from 'src/types/queue.type';
 import { BullBoardModule } from '@bull-board/nestjs';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
-import { InitialChargeProcessor } from './initial-charge.processor';
+import { DailyChargeProcessor } from './daily-charge.processor';
 import { ChargeModule } from '../charge/charge.module';
 import { SubscriptionsModule } from 'src/modules/subscriptions/subscriptions.module';
 
@@ -13,14 +13,14 @@ import { SubscriptionsModule } from 'src/modules/subscriptions/subscriptions.mod
     ChargeModule,
     SubscriptionsModule,
     BullModule.registerQueue({
-      name: QueueType.InitialCharge,
+      name: QueueType.DailyCharge,
     }),
     BullBoardModule.forFeature({
-      name: QueueType.InitialCharge,
+      name: QueueType.DailyCharge,
       adapter: BullMQAdapter,
     }),
   ],
-  providers: [InitialChargeService, InitialChargeProcessor],
-  exports: [InitialChargeService],
+  providers: [DailyChargeService, DailyChargeProcessor],
+  exports: [DailyChargeService],
 })
-export class InitialChargeModule {}
+export class DailyChargeModule {}

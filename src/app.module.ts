@@ -4,7 +4,6 @@ import { BlockScannerModule } from './modules/jobs/block-scanner/block-scanner.m
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ChargeModule } from './modules/charge/charge.module';
 import { validate } from './config/env.validation';
 import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module';
 import { SmartAccountsModule } from './modules/smart-accounts/smart-accounts.module';
@@ -15,6 +14,7 @@ import { redisStore } from 'cache-manager-ioredis-yet';
 import { BullModule } from '@nestjs/bullmq';
 import { BullBoardModule } from '@bull-board/nestjs';
 import { ExpressAdapter } from '@bull-board/express';
+import { DailyChargeModule } from './modules/jobs/daily-charge/daily-charge.module';
 
 @Module({
   imports: [
@@ -62,11 +62,11 @@ import { ExpressAdapter } from '@bull-board/express';
       adapter: ExpressAdapter,
     }),
     BlockScannerModule,
-    ChargeModule,
     SmartAccountsModule,
     SubscriptionsModule,
     TokenBalancesModule,
     ActivityLogsModule,
+    DailyChargeModule,
   ],
 })
 export class AppModule {}

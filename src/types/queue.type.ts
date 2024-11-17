@@ -4,6 +4,8 @@ export enum QueueType {
   TokenBalancesFetcher = 'token-balances-fetcher',
   InsertActivityLog = 'insert-activity-log',
   InitialCharge = 'initial-charge',
+  DailyCharge = 'daily-charge',
+  Charge = 'charge',
 }
 
 export enum QueueJobType {
@@ -12,4 +14,6 @@ export enum QueueJobType {
   FetchTokenBalances = 'fetch-token-balances',
   InsertActivityLog = 'insert-activity-log',
   InitialCharge = 'initial-charge',
+  DailyCharge = 'daily-charge',
+  Charge = 'charge',
 }

@@ -22,11 +22,6 @@ export class InitialChargeService {
         opts: {
           removeOnComplete: true,
           removeOnFail: { count: 10 },
-          attempts: 3,
-          backoff: {
-            type: 'exponential',
-            delay: 1000,
-          },
         },
       })),
     );
