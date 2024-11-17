@@ -8,6 +8,8 @@ import { ActivityType } from 'src/modules/activity-logs/entities/activity-logs.e
 import { BaseHandlerService } from '../types/base-handler.service';
 import { ERC20TransferEventsEntity } from './entities/erc20-transfer-events.entity';
 import { BlocksService } from 'src/modules/blocks/blocks.service';
+import { TokenBalancesFetcherService } from 'src/modules/jobs/token-balances-fetcher/token-balances-fetcher.service';
+import { zeroAddress } from 'viem';
 
 @Injectable()
 export class ERC20HandlerService extends BaseHandlerService {
@@ -16,9 +18,9 @@ export class ERC20HandlerService extends BaseHandlerService {
   constructor(
     @InjectRepository(ERC20TransferEventsEntity)
     private erc20TransferEventsRepository: Repository<ERC20TransferEventsEntity>,
-    private readonly tokenBalancesService: TokenBalancesService,
     private readonly blocksService: BlocksService,
     eventEmitter: EventEmitter2,
+    private readonly tokenBalancesFetcherService: TokenBalancesFetcherService,
   ) {
     super(eventEmitter);
   }
@@ -58,8 +60,9 @@ export class ERC20HandlerService extends BaseHandlerService {
           ])
           .flat(),
       ),
-    );
-    this.tokenBalancesService.refetch(fetchBalanceArgs);
+    ).filter((args) => args.account !== zeroAddress);
+
+    await this.tokenBalancesFetcherService.addBulkJob(fetchBalanceArgs);
 
     // Create activity logs for the transfer events
     if (eventInsertedRaw.length === 0) {
