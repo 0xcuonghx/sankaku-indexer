@@ -4,10 +4,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SmartWalletCreateEventsEntity } from '../factory-handler/entities/smart-wallet-create-events.entity';
 import { SmartAccountsService } from 'src/modules/smart-accounts/smart-accounts.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ActivityType } from 'src/modules/activity-logs/entities/activity-logs.entity';
 import { BaseHandlerService } from '../types/base-handler.service';
 import { BlocksService } from 'src/modules/blocks/blocks.service';
+import { InsertActivityLogService } from 'src/modules/jobs/insert-activity-log/insert-activity-log.service';
 
 @Injectable()
 export class FactoryHandlerService extends BaseHandlerService {
@@ -18,9 +18,9 @@ export class FactoryHandlerService extends BaseHandlerService {
     private smartWalletCreateEventsRepository: Repository<SmartWalletCreateEventsEntity>,
     private readonly smartAccountsService: SmartAccountsService,
     private readonly blocksService: BlocksService,
-    eventEmitter: EventEmitter2,
+    private readonly insertActivityLogService: InsertActivityLogService,
   ) {
-    super(eventEmitter);
+    super();
   }
 
   async handle(events: EnhancedEvent[], backfill = false) {
@@ -82,7 +82,7 @@ export class FactoryHandlerService extends BaseHandlerService {
         const block = await this.blocksService.getBlockByHash(
           insertedEvents.raw[0].block_hash,
         );
-        this.createActivityLog(
+        this.insertActivityLogService.addJob(
           insertedEvents.raw.map((event) => ({
             account: event.account,
             type: ActivityType.WalletCreated,

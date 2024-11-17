@@ -6,6 +6,7 @@ import { RecurringExecutorUninstallEventsEntity } from './entities/recurring-exe
 import { RecurringExecutorHandlerService } from './recurring-executor-handler.service';
 import { BlocksModule } from 'src/modules/blocks/blocks.module';
 import { SubscriptionsModule } from 'src/modules/subscriptions/subscriptions.module';
+import { InsertActivityLogModule } from 'src/modules/jobs/insert-activity-log/insert-activity-log.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SubscriptionsModule } from 'src/modules/subscriptions/subscriptions.mod
     ]),
     BlocksModule,
     SubscriptionsModule,
+    InsertActivityLogModule,
   ],
   providers: [RecurringExecutorHandlerService],
   exports: [RecurringExecutorHandlerService],

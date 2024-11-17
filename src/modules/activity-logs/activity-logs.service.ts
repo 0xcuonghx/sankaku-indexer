@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  ActivityLogCreatedEvent,
-  EventChannel,
-} from 'src/types/internal-event.type';
+import { EventChannel } from 'src/types/internal-event.type';
 import { ActivityLogsEntity } from './entities/activity-logs.entity';
 import { Repository } from 'typeorm';
 import { GetActivityLogsDto } from './dtos/get-activity-logs.dto';
+import { InsertActivityLogJobData } from '../jobs/insert-activity-log/insert-activity-log.service';
 
 @Injectable()
 export class ActivityLogsService {
@@ -16,8 +14,7 @@ export class ActivityLogsService {
     private activityLogsRepository: Repository<ActivityLogsEntity>,
   ) {}
 
-  @OnEvent(EventChannel.ActivityLogCreated)
-  save(args: ActivityLogCreatedEvent['data'][]) {
+  save(args: InsertActivityLogJobData) {
     return this.activityLogsRepository
       .createQueryBuilder()
       .insert()

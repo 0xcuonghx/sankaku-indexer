@@ -2,14 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EnhancedEvent } from 'src/types/event.type';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TokenBalancesService } from 'src/modules/token-balances/token-balances.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ActivityType } from 'src/modules/activity-logs/entities/activity-logs.entity';
 import { BaseHandlerService } from '../types/base-handler.service';
 import { ERC20TransferEventsEntity } from './entities/erc20-transfer-events.entity';
 import { BlocksService } from 'src/modules/blocks/blocks.service';
 import { TokenBalancesFetcherService } from 'src/modules/jobs/token-balances-fetcher/token-balances-fetcher.service';
 import { zeroAddress } from 'viem';
+import { InsertActivityLogService } from 'src/modules/jobs/insert-activity-log/insert-activity-log.service';
 
 @Injectable()
 export class ERC20HandlerService extends BaseHandlerService {
@@ -19,10 +18,10 @@ export class ERC20HandlerService extends BaseHandlerService {
     @InjectRepository(ERC20TransferEventsEntity)
     private erc20TransferEventsRepository: Repository<ERC20TransferEventsEntity>,
     private readonly blocksService: BlocksService,
-    eventEmitter: EventEmitter2,
     private readonly tokenBalancesFetcherService: TokenBalancesFetcherService,
+    private readonly insertActivityLogService: InsertActivityLogService,
   ) {
-    super(eventEmitter);
+    super();
   }
 
   async handle(
@@ -72,7 +71,7 @@ export class ERC20HandlerService extends BaseHandlerService {
       eventInsertedRaw[0].block_hash,
     );
 
-    this.createActivityLog(
+    await this.insertActivityLogService.addJob(
       eventInsertedRaw
         .map((event) => [
           {

@@ -12,6 +12,7 @@ import { RecurringExecutorExecuteEventsEntity } from './entities/recurring-execu
 import { RecurringExecutorInstallEventsEntity } from './entities/recurring-executor-install-events.entity';
 import { RecurringExecutorUninstallEventsEntity } from './entities/recurring-executor-uninstall-events.entity';
 import { BlocksService } from 'src/modules/blocks/blocks.service';
+import { InsertActivityLogService } from 'src/modules/jobs/insert-activity-log/insert-activity-log.service';
 
 @Injectable()
 export class RecurringExecutorHandlerService extends BaseHandlerService {
@@ -26,9 +27,10 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     private recurringExecutorUninstallEventsRepository: Repository<RecurringExecutorUninstallEventsEntity>,
     private readonly blocksService: BlocksService,
     private readonly subscriptionsService: SubscriptionsService,
-    eventEmitter: EventEmitter2,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly insertActivityLogService: InsertActivityLogService,
   ) {
-    super(eventEmitter);
+    super();
   }
 
   async handle(
@@ -115,7 +117,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
         insertedEvents.raw[0].block_hash,
       );
 
-      this.createActivityLog(
+      await this.insertActivityLogService.addJob(
         insertedEvents.raw.map((event) => ({
           account: event.account,
           type: ActivityType.RecurringExecutionInstalled,
@@ -165,7 +167,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
         insertedEvents.raw[0].block_hash,
       );
 
-      this.createActivityLog(
+      await this.insertActivityLogService.addJob(
         insertedEvents.raw.map((event) => ({
           account: event.account,
           type: ActivityType.RecurringExecutionUninstalled,
@@ -213,7 +215,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
         insertedEvents.raw[0].block_hash,
       );
 
-      this.createActivityLog(
+      this.insertActivityLogService.addJob(
         insertedEvents.raw.map((event) => ({
           account: event.account,
           type: ActivityType.RecurringExecutionExecuted,
