@@ -16,15 +16,10 @@ export class SyncService {
     private readonly blocksService: BlocksService,
   ) {}
 
-  async sync(
-    fromBlock: number,
-    toBlock: number,
-    backfill: boolean = false,
-    attempts = 1,
-  ) {
+  async sync(fromBlock: number, toBlock: number, backfill: boolean = false) {
     try {
       this.logger.debug(
-        `attempts#${attempts}: Syncing from block ${fromBlock} to block ${toBlock} (backfill: ${backfill})`,
+        `Syncing from block ${fromBlock} to block ${toBlock} (backfill: ${backfill})`,
       );
 
       const blocks = await this.blockchainClientService.getBlocks(
@@ -82,18 +77,7 @@ export class SyncService {
         this.logger.debug('Rate limited');
       }
 
-      if (attempts > getNetworkSettings().maxRetryAttempts) {
-        this.logger.error(
-          `Max attempts try to sync from block ${fromBlock} to block ${toBlock} (backfill: ${backfill})`,
-        );
-        return;
-      }
-
-      this.logger.debug(
-        `Retrying sync from block ${fromBlock} to block ${toBlock} (backfill: ${backfill})`,
-      );
-      await delay(getNetworkSettings().retryDelayTime);
-      this.sync(fromBlock, toBlock, backfill, attempts + 1);
+      throw error;
     }
   }
 

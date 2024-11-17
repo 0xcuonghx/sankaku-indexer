@@ -65,6 +65,7 @@ export class BlockScannerProcessor extends WorkerHost {
     } catch (error) {
       this.logger.error('Error scanning blocks');
       this.logger.debug(error);
+      throw error;
     }
   }
 }

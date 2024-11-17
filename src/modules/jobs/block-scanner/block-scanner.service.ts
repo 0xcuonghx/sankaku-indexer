@@ -26,6 +26,11 @@ export class BlockScannerService {
         repeat: {
           pattern: `*/${getNetworkSettings().blockScanInterval} * * * * *`,
         },
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 1000,
+        },
       },
     );
   }
