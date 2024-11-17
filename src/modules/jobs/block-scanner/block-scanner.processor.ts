@@ -1,30 +1,29 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
-import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
-import { SyncService } from '../sync/sync.service';
+import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject, Logger } from '@nestjs/common';
 import { getNetworkSettings } from 'src/config/network.config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueueType } from 'src/types/queue.type';
+import { SyncService } from '../../sync/sync.service';
+import { BlockchainClientService } from '../../blockchain-client/blockchain-client.service';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { BackfillSyncService } from '../backfill-sync/backfill-sync.service';
 
-@Injectable()
-export class BlockScannerService {
-  private readonly logger = new Logger(BlockScannerService.name);
-  private lock = false;
+@Processor(QueueType.BlockScanner, {
+  concurrency: 1,
+})
+export class BlockScannerProcessor extends WorkerHost {
+  private readonly logger = new Logger(BlockScannerProcessor.name);
 
   constructor(
     private readonly blockchainClientService: BlockchainClientService,
     private readonly syncService: SyncService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+    private readonly backfillSyncService: BackfillSyncService,
+  ) {
+    super();
+  }
 
-  @Cron(`*/${getNetworkSettings().blockScanInterval} * * * * *`)
-  async scanBlocks() {
+  async process() {
     try {
-      if (this.lock) {
-        return;
-      }
-      this.lock = true;
       this.logger.debug(
         `Scanning blocks every ${getNetworkSettings().blockScanInterval} seconds`,
       );
@@ -50,11 +49,11 @@ export class BlockScannerService {
       }
 
       const fromBlock = Math.max(localBlock, headBlock - maxBlocks + 1);
-      await this.syncService.realtimeSync(fromBlock, headBlock);
+      await this.syncService.sync(fromBlock, headBlock);
 
       // Queue any remaining blocks for backfilling
       if (localBlock < fromBlock) {
-        this.syncService.backfillSync(localBlock, fromBlock - 1);
+        await this.backfillSyncService.addJob(localBlock, fromBlock - 1);
       }
 
       // To avoid missing any events, save the latest synced block with a delay.
@@ -63,12 +62,10 @@ export class BlockScannerService {
       // be missing due to upstream chain reorgs):
       // https://ethereum.stackexchange.com/questions/109660/eth-getlogs-and-some-missing-logs
       await this.cacheManager.set('last_synced_block', headBlock - 5);
-
-      this.lock = false;
     } catch (error) {
-      this.lock = false;
       this.logger.error('Error scanning blocks');
       this.logger.debug(error);
+      throw error;
     }
   }
 }

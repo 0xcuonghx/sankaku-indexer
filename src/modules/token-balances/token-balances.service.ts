@@ -4,8 +4,6 @@ import { TokenBalancesEntity } from './entities/token-balances.entity';
 import { Repository } from 'typeorm';
 import { BlockchainClientService } from '../blockchain-client/blockchain-client.service';
 import { parseAbi } from 'viem';
-import { getNetworkSettings } from 'src/config/network.config';
-import { delay } from 'src/utils/helpers';
 import { GetTokenBalancesDto } from './dtos/get-token-balances.dto';
 
 interface TokenBalanceRefetchParams {
@@ -22,22 +20,9 @@ export class TokenBalancesService {
     private readonly blockchainClientService: BlockchainClientService,
   ) {}
 
-  async refetch(params: TokenBalanceRefetchParams[]) {
-    // TODO: Using multiple calls
-    params.forEach(({ account, token }) => {
-      this.refetchByAccount(account, token);
-    });
-  }
-
-  async refetchByAccount(
-    account: `0x${string}`,
-    token: `0x${string}`,
-    attempts = 1,
-  ) {
+  async refetchByAccount(account: `0x${string}`, token: `0x${string}`) {
     try {
-      this.logger.debug(
-        `attempts#${attempts}: Refetching token balances for ${account}`,
-      );
+      this.logger.debug(`Refetching token balances for ${account}`);
       const balance =
         await this.blockchainClientService.publicClient.readContract({
           address: token,
@@ -61,16 +46,7 @@ export class TokenBalancesService {
     } catch (error) {
       this.logger.debug(error);
       this.logger.error(`Error token balances for ${account}`);
-
-      if (attempts > getNetworkSettings().maxRetryAttempts) {
-        this.logger.error(
-          `Max attempts try to refetch subscription for ${account}`,
-        );
-        return;
-      }
-
-      await delay(getNetworkSettings().retryDelayTime);
-      this.refetchByAccount(account, token, attempts + 1);
+      throw error;
     }
   }
 

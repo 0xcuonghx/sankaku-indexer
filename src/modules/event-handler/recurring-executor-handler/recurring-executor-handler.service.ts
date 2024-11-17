@@ -3,15 +3,15 @@ import { EnhancedEvent } from 'src/types/event.type';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InsertResult, Repository } from 'typeorm';
 
-import { SubscriptionsService } from 'src/modules/subscriptions/subscriptions.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EventChannel } from 'src/types/internal-event.type';
 import { ActivityType } from 'src/modules/activity-logs/entities/activity-logs.entity';
 import { BaseHandlerService } from '../types/base-handler.service';
 import { RecurringExecutorExecuteEventsEntity } from './entities/recurring-executor-execute-events.entity';
 import { RecurringExecutorInstallEventsEntity } from './entities/recurring-executor-install-events.entity';
 import { RecurringExecutorUninstallEventsEntity } from './entities/recurring-executor-uninstall-events.entity';
 import { BlocksService } from 'src/modules/blocks/blocks.service';
+import { InsertActivityLogService } from 'src/modules/jobs/insert-activity-log/insert-activity-log.service';
+import { InitialChargeService } from 'src/modules/jobs/initial-charge/initial-charge.service';
+import { SubscriptionsFetcherService } from 'src/modules/jobs/subscriptions-fetcher/subscriptions-fetcher.service';
 
 @Injectable()
 export class RecurringExecutorHandlerService extends BaseHandlerService {
@@ -25,10 +25,11 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     @InjectRepository(RecurringExecutorUninstallEventsEntity)
     private recurringExecutorUninstallEventsRepository: Repository<RecurringExecutorUninstallEventsEntity>,
     private readonly blocksService: BlocksService,
-    private readonly subscriptionsService: SubscriptionsService,
-    eventEmitter: EventEmitter2,
+    private readonly insertActivityLogService: InsertActivityLogService,
+    private readonly initialChargeService: InitialChargeService,
+    private readonly subscriptionsFetcherService: SubscriptionsFetcherService,
   ) {
-    super(eventEmitter);
+    super();
   }
 
   async handle(
@@ -68,7 +69,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     const accounts = Array.from(
       new Set(eventInsertedRaws.map((event) => event.account)),
     );
-    this.subscriptionsService.refetch(accounts);
+    this.subscriptionsFetcherService.addBulkJob(accounts);
   }
 
   async handleInstall(
@@ -101,12 +102,11 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
       .returning('*')
       .execute();
 
+    // Initial charge
     if (!backfill) {
-      insertedEvents.raw.forEach((event) => {
-        this.eventEmitter.emit(EventChannel.RecurringExecutorInstalled, {
-          account: event.account,
-        });
-      });
+      await this.initialChargeService.addBulkJob(
+        insertedEvents.raw.map((event) => event.account),
+      );
     }
 
     // Create activity logs
@@ -115,7 +115,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
         insertedEvents.raw[0].block_hash,
       );
 
-      this.createActivityLog(
+      await this.insertActivityLogService.addJob(
         insertedEvents.raw.map((event) => ({
           account: event.account,
           type: ActivityType.RecurringExecutionInstalled,
@@ -165,7 +165,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
         insertedEvents.raw[0].block_hash,
       );
 
-      this.createActivityLog(
+      await this.insertActivityLogService.addJob(
         insertedEvents.raw.map((event) => ({
           account: event.account,
           type: ActivityType.RecurringExecutionUninstalled,
@@ -213,7 +213,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
         insertedEvents.raw[0].block_hash,
       );
 
-      this.createActivityLog(
+      this.insertActivityLogService.addJob(
         insertedEvents.raw.map((event) => ({
           account: event.account,
           type: ActivityType.RecurringExecutionExecuted,

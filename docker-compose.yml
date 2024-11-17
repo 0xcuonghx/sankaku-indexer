@@ -36,15 +36,12 @@ services:
       - RECURRING_EXECUTOR_ADDRESS=${RECURRING_EXECUTOR_ADDRESS}
       - BLOCKS_PER_BATCH=${BLOCKS_PER_BATCH}
       - BLOCK_SCAN_INTERVAL=${BLOCK_SCAN_INTERVAL}
-      - BACKFILL_DELAY_TIME=${BACKFILL_DELAY_TIME}
-      - RETRY_DELAY_TIME=${RETRY_DELAY_TIME}
-      - MAX_RETRY_ATTEMPTS=${MAX_RETRY_ATTEMPTS}
       - START_BLOCK=${START_BLOCK}
     ports:
       - '4001:3000'
     depends_on:
       - cuonghx-sankaku-indexer-postgres
-      - cuonghx-sankaku-redis
+      - cuonghx-sankaku-indexer-redis
 volumes:
   cuonghx-sankaku-indexer-postgres-data:
   cuonghx-sankaku-indexer-redis-data:

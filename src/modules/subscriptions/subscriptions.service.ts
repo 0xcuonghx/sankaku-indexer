@@ -11,7 +11,6 @@ import {
   SubscriptionType,
 } from './entities/subscriptions.entity';
 import { Repository, MoreThanOrEqual, LessThan } from 'typeorm';
-import { delay } from 'src/utils/helpers';
 import moment from 'moment';
 import { GetSubscriptionsDto } from './dtos/get-subscriptions.dto';
 
@@ -24,18 +23,9 @@ export class SubscriptionsService {
     private readonly blockchainClientService: BlockchainClientService,
   ) {}
 
-  async refetch(accounts: `0x${string}`[]) {
-    // TODO: Using multiple calls
-    accounts.forEach((account) => {
-      this.refetchByAccount(account);
-    });
-  }
-
-  async refetchByAccount(account: `0x${string}`, attempts = 1) {
+  async refetchByAccount(account: `0x${string}`) {
     try {
-      this.logger.debug(
-        `attempts#${attempts}: Refetching subscription for ${account}`,
-      );
+      this.logger.debug(`Refetching subscription for ${account}`);
       const [planId, lastExecutionTimestamp] =
         await this.blockchainClientService.publicClient.readContract({
           address: getNetworkSettings()
@@ -133,16 +123,7 @@ export class SubscriptionsService {
     } catch (error) {
       this.logger.debug(error);
       this.logger.error(`Error refetching subscription for ${account}`);
-
-      if (attempts > getNetworkSettings().maxRetryAttempts) {
-        this.logger.error(
-          `Max attempts try to refetch subscription for ${account}`,
-        );
-        return;
-      }
-
-      await delay(getNetworkSettings().retryDelayTime);
-      this.refetchByAccount(account, attempts + 1);
+      throw error;
     }
   }
 

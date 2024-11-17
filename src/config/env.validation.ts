@@ -36,15 +36,6 @@ class EnvironmentVariables {
   BLOCK_SCAN_INTERVAL: number;
 
   @IsNumber()
-  BACKFILL_DELAY_TIME: number;
-
-  @IsNumber()
-  RETRY_DELAY_TIME: number;
-
-  @IsNumber()
-  MAX_RETRY_ATTEMPTS: number;
-
-  @IsNumber()
   START_BLOCK: number;
 }
 

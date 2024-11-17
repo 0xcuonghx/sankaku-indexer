@@ -24,6 +24,9 @@
     "migration:revert": "npm run typeorm -- migration:revert"
   },
   "dependencies": {
+    "@bull-board/api": "^6.5.2",
+    "@bull-board/nestjs": "^6.5.2",
+    "@nestjs/bullmq": "^10.2.2",
     "@nestjs/cache-manager": "^2.3.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.3.0",
@@ -33,6 +36,7 @@
     "@nestjs/schedule": "^4.1.1",
     "@nestjs/swagger": "^8.0.1",
     "@nestjs/typeorm": "^10.0.2",
+    "bullmq": "^5.25.6",
     "cache-manager": "^5.7.6",
     "cache-manager-ioredis-yet": "^2.1.2",
     "class-transformer": "^0.5.1",
