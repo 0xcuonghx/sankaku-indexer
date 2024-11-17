@@ -9,11 +9,15 @@ import { ActivityLogsService } from 'src/modules/activity-logs/activity-logs.ser
   concurrency: 3,
 })
 export class InsertActivityLogProcessor extends WorkerHost {
+  private readonly logger = new Logger(InsertActivityLogProcessor.name);
   constructor(private readonly activityLogsService: ActivityLogsService) {
     super();
   }
 
   async process(job: Job<InsertActivityLogJobData>) {
+    this.logger.debug(
+      `Attempts (#${job.attemptsMade}) to process job ${job.name} with data: ${JSON.stringify(job.data)}`,
+    );
     return this.activityLogsService.save(job.data);
   }
 }

@@ -3,8 +3,6 @@ import { BlockchainClientService } from '../blockchain-client/blockchain-client.
 import { getEventInterfaces } from 'src/abis';
 import { EnhancedEvent, EnhancedEventsByKind } from 'src/types/event.type';
 import { EventHandlerService } from '../event-handler/event-handler.service';
-import { delay } from 'src/utils/helpers';
-import { getNetworkSettings } from 'src/config/network.config';
 import { BlocksService } from '../blocks/blocks.service';
 
 @Injectable()

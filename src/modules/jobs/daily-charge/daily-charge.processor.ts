@@ -19,7 +19,9 @@ export class DailyChargeProcessor extends WorkerHost {
   }
 
   async process() {
-    this.logger.debug('Daily charge running');
+    this.logger.debug(
+      `Daily charge running at ${moment().format(`YYYY-MM-DD HH:mm:ss`)}`,
+    );
     const subscriptions = await this.subscriptionsService.getAccountsToCharge([
       moment().startOf('day').unix(),
       moment().endOf('day').unix(),

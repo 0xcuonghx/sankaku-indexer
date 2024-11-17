@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { getNetworkSettings } from 'src/config/network.config';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -25,11 +25,6 @@ export class BlockScannerService {
         jobId: QueueJobType.ScanBlock, // Ensure uniqueness of the job
         repeat: {
           pattern: `*/${getNetworkSettings().blockScanInterval} * * * * *`,
-        },
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 1000,
         },
       },
     );

@@ -20,10 +20,11 @@ export class ChargeProcessor extends WorkerHost {
   }
 
   async process(job: Job<ChargeJobData>) {
+    this.logger.debug(
+      `Attempts (#${job.attemptsMade}) to process job ${job.name} with data: ${JSON.stringify(job.data)}`,
+    );
     const { account } = job.data;
     try {
-      this.logger.debug(`Charging subscription for ${account}`);
-
       const hash =
         await this.blockchainClientService.walletClient.writeContract({
           address: getNetworkSettings()
