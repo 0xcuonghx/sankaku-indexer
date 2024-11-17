@@ -18,6 +18,7 @@ import { DailyChargeModule } from './modules/jobs/daily-charge/daily-charge.modu
 
 @Module({
   imports: [
+    // Third-party modules
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       validate,
@@ -61,12 +62,15 @@ import { DailyChargeModule } from './modules/jobs/daily-charge/daily-charge.modu
       route: '/queues',
       adapter: ExpressAdapter,
     }),
+    // Cron Job Modules
     BlockScannerModule,
+    DailyChargeModule,
+
+    // API Modules
+    ActivityLogsModule,
     SmartAccountsModule,
     SubscriptionsModule,
     TokenBalancesModule,
-    ActivityLogsModule,
-    DailyChargeModule,
   ],
 })
 export class AppModule {}
