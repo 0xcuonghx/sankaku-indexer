@@ -40,6 +40,15 @@ export class BackfillSyncService {
             fromBlock: job.fromBlock,
             toBlock: job.toBlock,
           },
+          opts: {
+            removeOnComplete: { count: 10 },
+            removeOnFail: { count: 10 },
+            attempts: 3,
+            backoff: {
+              type: 'exponential',
+              delay: 1000,
+            },
+          },
         })),
       );
       return;
@@ -54,7 +63,7 @@ export class BackfillSyncService {
       {
         removeOnComplete: { count: 10 },
         removeOnFail: { count: 10 },
-        attempts: 5,
+        attempts: 3,
         backoff: {
           type: 'exponential',
           delay: 1000,
