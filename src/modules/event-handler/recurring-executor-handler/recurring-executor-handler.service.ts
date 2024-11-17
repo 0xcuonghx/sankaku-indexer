@@ -3,8 +3,6 @@ import { EnhancedEvent } from 'src/types/event.type';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InsertResult, Repository } from 'typeorm';
 
-import { SubscriptionsService } from 'src/modules/subscriptions/subscriptions.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ActivityType } from 'src/modules/activity-logs/entities/activity-logs.entity';
 import { BaseHandlerService } from '../types/base-handler.service';
 import { RecurringExecutorExecuteEventsEntity } from './entities/recurring-executor-execute-events.entity';
@@ -13,6 +11,7 @@ import { RecurringExecutorUninstallEventsEntity } from './entities/recurring-exe
 import { BlocksService } from 'src/modules/blocks/blocks.service';
 import { InsertActivityLogService } from 'src/modules/jobs/insert-activity-log/insert-activity-log.service';
 import { InitialChargeService } from 'src/modules/jobs/initial-charge/initial-charge.service';
+import { SubscriptionsFetcherService } from 'src/modules/jobs/subscriptions-fetcher/subscriptions-fetcher.service';
 
 @Injectable()
 export class RecurringExecutorHandlerService extends BaseHandlerService {
@@ -26,10 +25,9 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     @InjectRepository(RecurringExecutorUninstallEventsEntity)
     private recurringExecutorUninstallEventsRepository: Repository<RecurringExecutorUninstallEventsEntity>,
     private readonly blocksService: BlocksService,
-    private readonly subscriptionsService: SubscriptionsService,
-    private readonly eventEmitter: EventEmitter2,
     private readonly insertActivityLogService: InsertActivityLogService,
     private readonly initialChargeService: InitialChargeService,
+    private readonly subscriptionsFetcherService: SubscriptionsFetcherService,
   ) {
     super();
   }
@@ -71,7 +69,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     const accounts = Array.from(
       new Set(eventInsertedRaws.map((event) => event.account)),
     );
-    this.subscriptionsService.refetch(accounts);
+    this.subscriptionsFetcherService.addBulkJob(accounts);
   }
 
   async handleInstall(

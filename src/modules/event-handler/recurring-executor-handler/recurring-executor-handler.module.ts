@@ -8,6 +8,7 @@ import { BlocksModule } from 'src/modules/blocks/blocks.module';
 import { SubscriptionsModule } from 'src/modules/subscriptions/subscriptions.module';
 import { InsertActivityLogModule } from 'src/modules/jobs/insert-activity-log/insert-activity-log.module';
 import { InitialChargeModule } from 'src/modules/jobs/initial-charge/initial-charge.module';
+import { SubscriptionsFetcherModule } from 'src/modules/jobs/subscriptions-fetcher/subscriptions-fetcher.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { InitialChargeModule } from 'src/modules/jobs/initial-charge/initial-cha
     SubscriptionsModule,
     InsertActivityLogModule,
     InitialChargeModule,
+    SubscriptionsFetcherModule,
   ],
   providers: [RecurringExecutorHandlerService],
   exports: [RecurringExecutorHandlerService],

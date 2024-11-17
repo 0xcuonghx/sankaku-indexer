@@ -6,6 +6,7 @@ export enum QueueType {
   InitialCharge = 'initial-charge',
   DailyCharge = 'daily-charge',
   Charge = 'charge',
+  SubscriptionsFetcher = 'subscriptions-fetcher',
 }
 
 export enum QueueJobType {
@@ -16,4 +17,5 @@ export enum QueueJobType {
   InitialCharge = 'initial-charge',
   DailyCharge = 'daily-charge',
   Charge = 'charge',
+  FetchSubscriptions = 'fetch-subscriptions',
 }

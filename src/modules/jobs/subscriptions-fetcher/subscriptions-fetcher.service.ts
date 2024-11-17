@@ -3,48 +3,32 @@ import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { QueueJobType, QueueType } from 'src/types/queue.type';
 
-export interface ChargeJobData {
+export type SubscriptionsFetcherJobData = {
   account: `0x${string}`;
-}
+};
 
 @Injectable()
-export class ChargeService {
+export class SubscriptionsFetcherService {
   constructor(
-    @InjectQueue(QueueType.Charge)
-    private readonly chargeQueue: Queue,
+    @InjectQueue(QueueType.SubscriptionsFetcher)
+    private readonly SubscriptionsFetcherQueue: Queue,
   ) {}
 
   async addBulkJob(accounts: `0x${string}`[]) {
-    return this.chargeQueue.addBulk(
+    return this.SubscriptionsFetcherQueue.addBulk(
       accounts.map((account) => ({
-        name: QueueJobType.Charge,
+        name: QueueJobType.FetchSubscriptions,
         data: { account },
         opts: {
           removeOnComplete: true,
           removeOnFail: { count: 10 },
-          attempts: 3,
+          attempts: 5,
           backoff: {
             type: 'exponential',
             delay: 1000,
           },
         },
       })),
-    );
-  }
-
-  async addJob(account: `0x${string}`) {
-    return this.chargeQueue.add(
-      QueueJobType.Charge,
-      { account },
-      {
-        removeOnComplete: true,
-        removeOnFail: { count: 10 },
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 1000,
-        },
-      },
     );
   }
 }
