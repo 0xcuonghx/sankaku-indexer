@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EventChannel } from 'src/types/internal-event.type';
 import { ActivityLogsEntity } from './entities/activity-logs.entity';
 import { Repository } from 'typeorm';
 import { GetActivityLogsDto } from './dtos/get-activity-logs.dto';

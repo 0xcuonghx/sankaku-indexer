@@ -3,6 +3,7 @@ export enum QueueType {
   BackfillSync = 'backfill-sync',
   TokenBalancesFetcher = 'token-balances-fetcher',
   InsertActivityLog = 'insert-activity-log',
+  InitialCharge = 'initial-charge',
 }
 
 export enum QueueJobType {
@@ -10,4 +11,5 @@ export enum QueueJobType {
   BackfillSync = 'backfill-sync',
   FetchTokenBalances = 'fetch-token-balances',
   InsertActivityLog = 'insert-activity-log',
+  InitialCharge = 'initial-charge',
 }

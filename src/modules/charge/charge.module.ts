@@ -6,5 +6,6 @@ import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 @Module({
   imports: [BlockchainClientModule, SubscriptionsModule],
   providers: [ChargeService],
+  exports: [ChargeService],
 })
 export class ChargeModule {}

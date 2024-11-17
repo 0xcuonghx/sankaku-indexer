@@ -7,6 +7,7 @@ import { RecurringExecutorHandlerService } from './recurring-executor-handler.se
 import { BlocksModule } from 'src/modules/blocks/blocks.module';
 import { SubscriptionsModule } from 'src/modules/subscriptions/subscriptions.module';
 import { InsertActivityLogModule } from 'src/modules/jobs/insert-activity-log/insert-activity-log.module';
+import { InitialChargeModule } from 'src/modules/jobs/initial-charge/initial-charge.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { InsertActivityLogModule } from 'src/modules/jobs/insert-activity-log/in
     BlocksModule,
     SubscriptionsModule,
     InsertActivityLogModule,
+    InitialChargeModule,
   ],
   providers: [RecurringExecutorHandlerService],
   exports: [RecurringExecutorHandlerService],

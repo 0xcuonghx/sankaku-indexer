@@ -5,7 +5,6 @@ import { InsertResult, Repository } from 'typeorm';
 
 import { SubscriptionsService } from 'src/modules/subscriptions/subscriptions.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EventChannel } from 'src/types/internal-event.type';
 import { ActivityType } from 'src/modules/activity-logs/entities/activity-logs.entity';
 import { BaseHandlerService } from '../types/base-handler.service';
 import { RecurringExecutorExecuteEventsEntity } from './entities/recurring-executor-execute-events.entity';
@@ -13,6 +12,7 @@ import { RecurringExecutorInstallEventsEntity } from './entities/recurring-execu
 import { RecurringExecutorUninstallEventsEntity } from './entities/recurring-executor-uninstall-events.entity';
 import { BlocksService } from 'src/modules/blocks/blocks.service';
 import { InsertActivityLogService } from 'src/modules/jobs/insert-activity-log/insert-activity-log.service';
+import { InitialChargeService } from 'src/modules/jobs/initial-charge/initial-charge.service';
 
 @Injectable()
 export class RecurringExecutorHandlerService extends BaseHandlerService {
@@ -29,6 +29,7 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
     private readonly subscriptionsService: SubscriptionsService,
     private readonly eventEmitter: EventEmitter2,
     private readonly insertActivityLogService: InsertActivityLogService,
+    private readonly initialChargeService: InitialChargeService,
   ) {
     super();
   }
@@ -103,12 +104,11 @@ export class RecurringExecutorHandlerService extends BaseHandlerService {
       .returning('*')
       .execute();
 
+    // Initial charge
     if (!backfill) {
-      insertedEvents.raw.forEach((event) => {
-        this.eventEmitter.emit(EventChannel.RecurringExecutorInstalled, {
-          account: event.account,
-        });
-      });
+      await this.initialChargeService.addBulkJob(
+        insertedEvents.raw.map((event) => event.account),
+      );
     }
 
     // Create activity logs
