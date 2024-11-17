@@ -41,7 +41,7 @@ services:
       - '4001:3000'
     depends_on:
       - cuonghx-sankaku-indexer-postgres
-      - cuonghx-sankaku-redis
+      - cuonghx-sankaku-indexer-redis
 volumes:
   cuonghx-sankaku-indexer-postgres-data:
   cuonghx-sankaku-indexer-redis-data:

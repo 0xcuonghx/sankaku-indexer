@@ -23,7 +23,7 @@ export class InsertActivityLogService {
       QueueJobType.InsertActivityLog,
       data,
       {
-        removeOnComplete: true,
+        removeOnComplete: { count: 10 },
         removeOnFail: { count: 10 },
       },
     );

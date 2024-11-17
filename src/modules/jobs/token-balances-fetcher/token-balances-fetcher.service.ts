@@ -21,7 +21,7 @@ export class TokenBalancesFetcherService {
         name: QueueJobType.FetchTokenBalances,
         data: jobData,
         opts: {
-          removeOnComplete: true,
+          removeOnComplete: { count: 10 },
           removeOnFail: { count: 10 },
           attempts: 5,
           backoff: {

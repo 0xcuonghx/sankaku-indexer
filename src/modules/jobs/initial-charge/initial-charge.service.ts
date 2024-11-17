@@ -20,7 +20,7 @@ export class InitialChargeService {
         name: QueueJobType.InitialCharge,
         data: { account },
         opts: {
-          removeOnComplete: true,
+          removeOnComplete: { count: 10 },
           removeOnFail: { count: 10 },
         },
       })),

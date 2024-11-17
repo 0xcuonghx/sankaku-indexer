@@ -16,7 +16,7 @@ export class DailyChargeService {
       QueueJobType.DailyCharge,
       {},
       {
-        removeOnComplete: true,
+        removeOnComplete: { count: 10 },
         removeOnFail: { count: 10 },
         jobId: QueueJobType.DailyCharge, // Ensure uniqueness of the job
         repeat: {

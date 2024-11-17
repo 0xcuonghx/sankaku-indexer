@@ -20,7 +20,7 @@ export class SubscriptionsFetcherService {
         name: QueueJobType.FetchSubscriptions,
         data: { account },
         opts: {
-          removeOnComplete: true,
+          removeOnComplete: { count: 10 },
           removeOnFail: { count: 10 },
           attempts: 5,
           backoff: {

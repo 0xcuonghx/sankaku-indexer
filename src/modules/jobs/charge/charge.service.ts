@@ -20,7 +20,7 @@ export class ChargeService {
         name: QueueJobType.Charge,
         data: { account },
         opts: {
-          removeOnComplete: true,
+          removeOnComplete: { count: 10 },
           removeOnFail: { count: 10 },
           attempts: 3,
           backoff: {
@@ -37,7 +37,7 @@ export class ChargeService {
       QueueJobType.Charge,
       { account },
       {
-        removeOnComplete: true,
+        removeOnComplete: { count: 10 },
         removeOnFail: { count: 10 },
         attempts: 3,
         backoff: {

@@ -20,7 +20,7 @@ export class BlockScannerService {
       QueueJobType.ScanBlock,
       {},
       {
-        removeOnComplete: true,
+        removeOnComplete: { count: 10 },
         removeOnFail: { count: 10 },
         jobId: QueueJobType.ScanBlock, // Ensure uniqueness of the job
         repeat: {
