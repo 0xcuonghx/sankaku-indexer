@@ -30,6 +30,7 @@ services:
       - POSTGRES_URL=postgresql://postgres:postgres@cuonghx-sankaku-indexer-postgres:5432/postgres
       - REDIS_HOST=cuonghx-sankaku-indexer-redis
       - REDIS_PORT=6379
+      - REDIS_DB=0
       - RPC_URLS=${RPC_URLS}
       - EXECUTOR_PRIVATE_KEY=${EXECUTOR_PRIVATE_KEY}
       - SUPPORTED_CURRENCY_ADDRESSES=${SUPPORTED_CURRENCY_ADDRESSES}
