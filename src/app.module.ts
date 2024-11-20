@@ -41,6 +41,7 @@ import { DailyChargeModule } from './modules/jobs/daily-charge/daily-charge.modu
         const store = await redisStore({
           host: configService.get('REDIS_HOST'),
           port: configService.get('REDIS_PORT'),
+          db: configService.get('REDIS_DB'),
         });
         return {
           store,
@@ -54,6 +55,7 @@ import { DailyChargeModule } from './modules/jobs/daily-charge/daily-charge.modu
         connection: {
           host: configService.get('REDIS_HOST'),
           port: configService.get('REDIS_PORT'),
+          db: configService.get('REDIS_DB'),
         },
       }),
       inject: [ConfigService],
