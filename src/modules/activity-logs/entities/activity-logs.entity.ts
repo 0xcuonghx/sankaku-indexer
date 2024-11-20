@@ -9,7 +9,7 @@ export enum ActivityType {
   RecurringExecutionExecuted = 'recurring_execution_executed',
 }
 
-@Entity({ name: 'activity_logs' })
+@Entity({ name: 'blockchain_activity_logs' })
 export class ActivityLogsEntity {
   @PrimaryGeneratedColumn()
   id: number;

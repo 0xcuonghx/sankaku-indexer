@@ -22,7 +22,7 @@ export enum SubscriptionType {
   Infinite = 'infinite',
 }
 
-@Entity({ name: 'subscriptions' })
+@Entity({ name: 'blockchain_subscriptions' })
 export class SubscriptionsEntity {
   @PrimaryColumn()
   account: string;

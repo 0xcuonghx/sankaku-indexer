@@ -1,7 +1,7 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEventsEntity } from '../../types/base-events.entity';
 
-@Entity({ name: 'smart_wallet_create_events' })
+@Entity({ name: 'blockchain_smart_wallet_create_events' })
 export class SmartWalletCreateEventsEntity extends BaseEventsEntity {
   @Column()
   account: string;

@@ -1,7 +1,7 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEventsEntity } from '../../types/base-events.entity';
 
-@Entity({ name: 'recurring_executor_execute_events' })
+@Entity({ name: 'blockchain_recurring_executor_execute_events' })
 export class RecurringExecutorExecuteEventsEntity extends BaseEventsEntity {
   @Column()
   account: string;

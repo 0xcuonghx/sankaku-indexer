@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity({ name: 'smart-accounts' })
+@Entity({ name: 'blockchain_smart-accounts' })
 export class SmartAccountsEntity {
   @PrimaryColumn()
   owner: string;
